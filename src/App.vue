@@ -1,18 +1,32 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <VueCarousel
+      :config="{
+        slidesVisible: {
+          xs: 1.5,
+          sm: 2,
+          md: 2.5,
+        },
+      }"
+    >
+      <template v-for="n in 10" v-slot:[n-1]>
+        <div :key="n - 1">
+          <img :key="n - 1" src="./assets/logo.png" alt="Logo" />
+          <div>{{ n }}</div>
+        </div>
+      </template>
+    </VueCarousel>
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import VueCarousel from './components/VueCarousel.vue';
 
 export default {
-  name: "App",
+  name: 'App',
   components: {
-    HelloWorld
-  }
+    VueCarousel,
+  },
 };
 </script>
 
@@ -24,5 +38,9 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+
+  img {
+    max-width: 90px;
+  }
 }
 </style>
