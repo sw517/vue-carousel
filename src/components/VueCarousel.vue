@@ -61,6 +61,7 @@ export default {
       currentSlide: 0,
       currentWindowWidth: 0,
       disableTransition: false,
+      isSkippingSlides: false,
       isStatic: false,
       slideCount: Object.keys(this.$slots).length,
       sliderConfig: {},
@@ -357,6 +358,10 @@ export default {
      * and timestamps to detirmine the direction of the touch swipe.
      */
     handleTouchEvent() {
+      // Do not allow swiping if carousel is in the process of skipping
+      // slides as this will cause the carousel to swipe past last slide.
+      if (this.isSkippingSlides) return;
+
       const startPos = this.touchEvent.swipeStartPosition;
       const endPos = this.touchEvent.swipeEndPosition;
       // Return if touch was not a long enough full swipe.
@@ -387,6 +392,7 @@ export default {
     handlePaginationWithLoop(direction) {
       if (direction === 'prev') {
         if (this.currentSlide === Math.ceil(this.visibleSlides)) {
+          this.isSkippingSlides = true;
           this.setCurrentSlide(this.currentSlide - 1);
           this.$refs.cycle.addEventListener(
             'transitionend',
@@ -405,6 +411,7 @@ export default {
           this.currentSlide ===
           this.slideCount + Math.ceil(this.visibleSlides) - 1
         ) {
+          this.isSkippingSlides = true;
           this.setCurrentSlide(this.currentSlide + 1);
           this.$refs.cycle.addEventListener(
             'transitionend',
@@ -419,11 +426,13 @@ export default {
       }
     },
     skipToSlide(slide) {
+      this.isSkippingSlides = true;
       this.disableAnimation();
       this.$nextTick().then(() => {
         this.setCurrentSlide(slide);
         this.$nextTick().then(() => {
           this.enableAnimation();
+          this.isSkippingSlides = false;
         });
       });
     },
