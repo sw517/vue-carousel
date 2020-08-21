@@ -61,6 +61,7 @@ export default {
       currentSlide: 0,
       currentWindowWidth: 0,
       disableTransition: false,
+      dragPosition: null,
       isSkippingSlides: false,
       isStatic: false,
       slideCount: Object.keys(this.$slots).length,
@@ -68,8 +69,10 @@ export default {
       touchEvent: {
         swipeStartPosition: null,
         swipeEndPosition: null,
+        swipeMovePosition: null,
         startTimeStamp: null,
         endTimeStamp: null,
+        moveTimeStamp: null,
       },
       visibleSlides: 1,
     };
@@ -116,11 +119,19 @@ export default {
     cCycleStyles() {
       if (this.isStatic) return null;
 
-      const transform =
-        (this.currentSlide * this.carouselWidth) / this.visibleSlides;
+      let transform;
+
+      if (this.dragPosition) {
+        transform =
+          (this.currentSlide * this.carouselWidth) / this.visibleSlides -
+          this.dragPosition;
+      } else {
+        transform =
+          (this.currentSlide * this.carouselWidth) / this.visibleSlides;
+      }
       return {
         transform: `translateX(-${transform}px)`,
-        transition: this.disableTransition ? 'none' : null,
+        transition: this.disableTransition || this.dragPosition ? 'none' : null,
       };
     },
   },
@@ -140,10 +151,17 @@ export default {
   },
   mounted() {
     this.recordCurrentWindowWidth();
+    this.setCurrentBreakpoint();
     this.setIsStatic();
     this.setCarouselWidth();
     this.setVisibleSlides(this.sliderConfig.slidesVisible);
-    this.setCurrentSlide(Math.ceil(this.visibleSlides));
+
+    if (isTrue(this.sliderConfig.loop)) {
+      this.setCurrentSlide(Math.ceil(this.visibleSlides));
+    } else {
+      this.setCurrentSlide(0);
+    }
+
     this.addTouchEventListeners();
     this.addResizeListener();
   },
@@ -204,7 +222,7 @@ export default {
      */
     setCurrentBreakpoint() {
       const { currentWindowWidth, breakpoints } = this;
-      const { xs, sm, md, lg, xl } = breakpoints;
+      const { sm, md, lg, xl } = breakpoints;
 
       // Do not change order as the find() function will return
       // the first breakpoint that matches its conditions.
@@ -213,7 +231,7 @@ export default {
         { breakpoint: 'lg', min: lg },
         { breakpoint: 'md', min: md },
         { breakpoint: 'sm', min: sm },
-        { breakpoint: 'xs', min: xs },
+        { breakpoint: 'xs', min: 0 },
       ];
 
       const currentBreakpointObject = breakpointsArray.find(
@@ -223,8 +241,8 @@ export default {
       );
       this.currentBreakpoint = currentBreakpointObject.breakpoint;
     },
-    setCurrentSlide(pageNumber) {
-      this.currentSlide = pageNumber;
+    setCurrentSlide(slideNumber) {
+      this.currentSlide = slideNumber;
     },
     setSlideCount() {
       this.slideCount = Object.keys(this.$slots).length;
@@ -242,11 +260,11 @@ export default {
      * detirmine how many slides should currently be visible.
      * This component is built mobile first so if only mobile
      * is set, this will also affect tablet and desktop.
-     * @param arg.xs {number} Number of slides visible at mobile
-     * @param arg.sm {number} Number of slides visible at tablet
-     * @param arg.md {number} Number of slides visible at laptop
-     * @param arg.lg {number} Number of slides visible at desktop
-     * @param arg.xl {number} Number of slides visible at large desktop (1600px)
+     * @param {number} arg.xs Number of slides visible at mobile
+     * @param {number} arg.sm Number of slides visible at tablet
+     * @param {number} arg.md Number of slides visible at laptop
+     * @param {number} arg.lg Number of slides visible at desktop
+     * @param {number} arg.xl Number of slides visible at large desktop (1600px)
      */
     setVisibleSlides({ xs, sm, md, lg, xl }) {
       switch (this.currentBreakpoint) {
@@ -308,11 +326,11 @@ export default {
      * mobile first so if only mobile or tablet padding is set, this
      * will affect laptop and desktop too.
      * Unit must be included i.e '10px' or '1rem'
-     * @param arg.xs {string} Slide padding at mobile
-     * @param arg.sm {string} Slide padding at tablet
-     * @param arg.md {string} Slide padding at laptop
-     * @param arg.lg {string} Slide padding at desktop
-     * @param arg.xl {string} Slide padding at large desktop (1600px)
+     * @param {string} arg.xs Slide padding at mobile
+     * @param {string} arg.sm Slide padding at tablet
+     * @param {string} arg.md Slide padding at laptop
+     * @param {string} arg.lg Slide padding at desktop
+     * @param {string} arg.xl Slide padding at large desktop (1600px)
      */
     getSlidePadding({ xs, sm, md, lg, xl }) {
       let padding = null;
@@ -337,7 +355,8 @@ export default {
       return padding;
     },
     /**
-     * Adds the touch-swipe events for mobile.
+     * Uses data properties on the component to store co-ordinates
+     * and timestamps to detirmine the direction of the touch swipe.
      */
     addTouchEventListeners() {
       const carousel = this.$refs['v-carousel'];
@@ -352,18 +371,57 @@ export default {
         this.touchEvent.endTimeStamp = e.timeStamp;
         this.handleTouchEvent();
       });
+
+      carousel.addEventListener(
+        'touchmove',
+        e => {
+          e.preventDefault();
+          this.touchEvent.swipeMovePosition =
+            e.changedTouches['0'].pageX - this.touchEvent.swipeStartPosition;
+          this.touchEvent.moveTimeStamp = e.timeStamp;
+          this.handleTouchEvent();
+        },
+        { passive: false },
+      );
     },
     /**
-     * Uses data properties on the component to store co-ordinates
-     * and timestamps to detirmine the direction of the touch swipe.
+     * Handle logic from touch end and move events.
+     * If user is still dragging the carousel cycle, update the drag position,
+     * else handle updating the pagination.
      */
     handleTouchEvent() {
       // Do not allow swiping if carousel is in the process of skipping
       // slides as this will cause the carousel to swipe past last slide.
       if (this.isSkippingSlides) return;
 
+      if (
+        !this.touchEvent.endTimeStamp ||
+        this.touchEvent.endTimeStamp < this.touchEvent.moveTimeStamp
+      ) {
+        this.setDragPosition(this.touchEvent.swipeMovePosition);
+      } else {
+        this.handleTouchSlide();
+      }
+    },
+    /**
+     * Set the distance of how far user has dragged with touch event.
+     * @param {number} position Distance in pixels the carousel cycle is dragged.
+     */
+    setDragPosition(position) {
+      this.dragPosition = position;
+    },
+    /**
+     * Handle the logic for moving the carousel cycle based on user touch slide.
+     * The method will check if the user dragged the cycle for the allowed
+     * amount of time and decide which method to handle pagination based on
+     * if the carousel is looped.
+     */
+    handleTouchSlide() {
+      // Reset drag position to prevent inteference.
+      this.setDragPosition(null);
       const startPos = this.touchEvent.swipeStartPosition;
       const endPos = this.touchEvent.swipeEndPosition;
+
       // Return if touch was not a long enough full swipe.
       if (Math.abs(startPos - endPos) <= 10) return;
 
@@ -372,59 +430,104 @@ export default {
         this.touchEvent.endTimeStamp - this.touchEvent.startTimeStamp;
 
       if (swipeTime < allowedTime) {
-        const direction = startPos < endPos ? 'prev' : 'next';
+        const increment = this.calculateTouchSlideIncrement(this.touchEvent);
+
         if (isTrue(this.sliderConfig.loop)) {
-          this.handlePaginationWithLoop(direction);
+          this.handlePaginationWithLoop(increment);
         } else {
-          this.handlePagination(direction);
+          this.handlePagination(increment);
         }
       }
     },
-    handlePagination(direction) {
-      if (direction === 'prev') {
-        if (this.currentSlide !== 0)
-          this.setCurrentSlide(this.currentSlide - 1);
+    /**
+     * Calculate how many slides to increment the carousel by. Slide
+     * will not increment if user drags by only half a slide and takes
+     * longer than the allowed amount of time to do so.
+     * @param {number} arg.swipeStartPosition X-Position of touch start.
+     * @param {number} arg.swipeEndPosition X-Position of touch end.
+     * @return {number} Number of slides to increment carousel.
+     */
+    calculateTouchSlideIncrement({ swipeStartPosition, swipeEndPosition }) {
+      const swipeDiff = swipeEndPosition - swipeStartPosition;
+      const itemWidth = this.carouselWidth / this.visibleSlides;
+      let increment = 0;
+      if (swipeDiff / itemWidth < 0.5 && swipeDiff / itemWidth > -0.5) {
+        const quickSwipeTime =
+          this.touchEvent.endTimeStamp - this.touchEvent.startTimeStamp;
+        if (quickSwipeTime < 700) {
+          increment = swipeDiff / itemWidth < 0 ? 1 : -1;
+        }
       } else {
-        if (this.currentSlide !== this.slideCount - 1)
-          this.setCurrentSlide(this.currentSlide + 1);
+        increment = -Math.round(swipeDiff / itemWidth);
       }
+      return increment;
     },
-    handlePaginationWithLoop(direction) {
-      if (direction === 'prev') {
-        if (this.currentSlide === Math.ceil(this.visibleSlides)) {
-          this.isSkippingSlides = true;
-          this.setCurrentSlide(this.currentSlide - 1);
-          this.$refs.cycle.addEventListener(
-            'transitionend',
-            () => {
-              this.skipToSlide(
-                this.slideCount + Math.ceil(this.visibleSlides) - 1,
-              );
-            },
-            { once: true },
-          );
+    /**
+     * Set the current slide using the direction and current
+     * active slide.
+     * @param {number} increment Number of slides the pagination should
+     * increment by.
+     */
+    handlePagination(increment) {
+      if (increment < 0) {
+        if (this.currentSlide + increment > 0) {
+          this.setCurrentSlide(this.currentSlide + increment);
         } else {
-          this.setCurrentSlide(this.currentSlide - 1);
+          this.setCurrentSlide(0);
         }
       } else {
         if (
-          this.currentSlide ===
-          this.slideCount + Math.ceil(this.visibleSlides) - 1
+          this.currentSlide + increment <
+          this.slideCount - this.visibleSlides
         ) {
-          this.isSkippingSlides = true;
-          this.setCurrentSlide(this.currentSlide + 1);
-          this.$refs.cycle.addEventListener(
-            'transitionend',
-            () => {
-              this.skipToSlide(Math.ceil(this.visibleSlides));
-            },
-            { once: true },
-          );
+          this.setCurrentSlide(this.currentSlide + increment);
         } else {
-          this.setCurrentSlide(this.currentSlide + 1);
+          this.setCurrentSlide(this.slideCount - this.visibleSlides);
         }
       }
     },
+    /**
+     * Set the current slide using the increment param and current
+     * active slide. This method should be used if the carousel
+     * is set to loop. The carousel will disable animation whilst
+     * changing to a slide if the carousel needs to reset to the start
+     * or end.
+     * @param {number} increment Number of slides the carousel should increment by.
+     */
+    handlePaginationWithLoop(increment) {
+      if (increment < 0) {
+        if (this.currentSlide + increment < Math.ceil(this.visibleSlides)) {
+          this.isSkippingSlides = true;
+          this.$refs.cycle.addEventListener(
+            'transitionend',
+            () => {
+              this.skipToSlide(this.slideCount + this.currentSlide);
+            },
+            { once: true },
+          );
+        }
+        this.setCurrentSlide(this.currentSlide + increment);
+      } else {
+        if (
+          this.currentSlide + increment >
+          this.slideCount + Math.ceil(this.visibleSlides) - 1
+        ) {
+          this.isSkippingSlides = true;
+          this.$refs.cycle.addEventListener(
+            'transitionend',
+            () => {
+              this.skipToSlide(this.currentSlide - this.slideCount);
+            },
+            { once: true },
+          );
+        }
+        this.setCurrentSlide(this.currentSlide + increment);
+      }
+    },
+    /**
+     * Change active slide in carousel without animating.
+     * @param {number} slide The slide to set as active.
+     */
     skipToSlide(slide) {
       this.isSkippingSlides = true;
       this.disableAnimation();
@@ -436,9 +539,15 @@ export default {
         });
       });
     },
+    /**
+     * Prevent the carousel transition from animating.
+     */
     disableAnimation() {
       this.disableTransition = true;
     },
+    /**
+     * Enable the carousel transition to animate.
+     */
     enableAnimation() {
       this.disableTransition = false;
     },
