@@ -2,33 +2,34 @@
   <div id="app">
     <VueCarousel
       :config="{
-        loop: false,
         slidesVisible: {
           xs: 2,
-          sm: 3,
-          md: 3.5,
-        },
+          sm: 3.5,
+          md: 3.5
+        }
       }"
     >
       <template v-for="n in 10" v-slot:[n-1]>
         <div :key="n - 1">
-          <img :key="n - 1" src="./assets/logo.png" alt="Logo" />
+          <img src="./assets/logo.png" alt="Logo" />
           <div>{{ n }}</div>
         </div>
       </template>
+      <template v-slot:previous><span>Previous</span></template>
+      <template v-slot:next><span>Next</span></template>
     </VueCarousel>
   </div>
 </template>
 
 <script>
-import VueCarousel from './components/VueCarousel.vue';
+import VueCarousel from './components/VueCarousel.vue'
 
 export default {
   name: 'App',
   components: {
-    VueCarousel,
-  },
-};
+    VueCarousel
+  }
+}
 </script>
 
 <style lang="scss">
