@@ -1,5 +1,11 @@
 export default function isTrue(val) {
-  return (
-    (typeof val === 'boolean' && val === true) || val === 'true' || val === 1
-  );
+  switch (typeof val) {
+    case 'string':
+      return val !== 'false' && val.length
+    case 'object':
+      if (Array.isArray(val)) return val.length
+      return Object.keys(val)
+    default:
+      return val
+  }
 }
