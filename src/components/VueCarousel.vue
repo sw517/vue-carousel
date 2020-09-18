@@ -1,51 +1,66 @@
 <template>
-  <div
-    ref="v-carousel"
-    class="v-carousel"
-    :class="[{ 'v-carousel--static': isStatic }]"
-  >
-    <div ref="cycle" :style="cCycleStyles" class="v-carousel__cycle">
-      <div
-        v-for="(slot, index) in cSlideList"
-        :key="index"
-        :style="cSlideStyles"
-        class="v-carousel__slide"
+  <div class="v-carousel" :class="[{ 'v-carousel--static': isStatic }]">
+    <div class="v-carousel__controls" v-if="!isStatic">
+      <VueCarouselButton
+        @click.native="handleControlBtnClick(-1)"
+        aria-label="Previous Slide"
+        class="v-carousel__controls__btn v-carousel__controls__btn--prev"
+        :class="{
+          'v-carousel__controls__btn--disabled': isButtonDisabled('prev')
+        }"
       >
-        <slot :name="slot" />
-      </div>
+        <slot name="previous">
+          <span v-html="this.sliderConfig.controls.previous" />
+        </slot>
+      </VueCarouselButton>
+      <VueCarouselButton
+        @click.native="handleControlBtnClick(1)"
+        aria-label="Next Slide"
+        class="v-carousel__controls__btn v-carousel__controls__btn--next"
+        :class="{
+          'v-carousel__controls__btn--disabled': isButtonDisabled('next')
+        }"
+      >
+        <slot name="next">
+          <span v-html="this.sliderConfig.controls.next" />
+        </slot>
+      </VueCarouselButton>
     </div>
-    <div class="v-carousel__pagination">
-      <!-- <PaginationButtons
-        v-if="!isStatic && visibleSlides !== Object.keys($slots).length"
-        @pagination-click="setCurrentSlide"
-        :buttonCount="slideCount"
-        :activeButton="currentSlide"
-        :isWhite="sliderConfig.whitePagination"
-      /> -->
+    <div ref="v-carousel-wrap" class="v-carousel__wrap">
+      <div ref="cycle" :style="cCycleStyles" class="v-carousel__cycle">
+        <div
+          v-for="(slot, index) in cSlideIndexArray"
+          :key="index"
+          :style="cSlideStyles"
+          class="v-carousel__slide"
+        >
+          <slot :name="slot" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 // Helpers
-import merge from 'lodash.merge';
-import isTrue from '@/scripts/helpers/isTrue';
+import merge from 'lodash.merge'
+import isTrue from '@/scripts/helpers/isTrue'
 // Components
-// import PaginationButtons from "@/components/molecules/pagination-buttons/PaginationButtons.vue";
+import VueCarouselButton from '@/components/VueCarouselButton'
 
 export default {
   name: 'VueCarousel',
   components: {
-    // PaginationButtons
+    VueCarouselButton
   },
   props: {
     config: {
       type: Object,
       required: false,
       default() {
-        return {};
-      },
-    },
+        return {}
+      }
+    }
   },
   data() {
     return {
@@ -54,7 +69,7 @@ export default {
         sm: 600,
         md: 980,
         lg: 1200,
-        xl: 1600,
+        xl: 1600
       },
       carouselWidth: null,
       currentBreakpoint: 'xs',
@@ -72,33 +87,31 @@ export default {
         swipeMovePosition: null,
         startTimeStamp: null,
         endTimeStamp: null,
-        moveTimeStamp: null,
+        moveTimeStamp: null
       },
-      visibleSlides: 1,
-    };
+      visibleSlideCount: 1
+    }
   },
   computed: {
-    cSlideList() {
-      const slides = [];
-      const visibleSlides = Math.ceil(this.visibleSlides);
-      for (let i = 0; i < this.slideCount; i += 1) slides.push(i);
+    cSlideIndexArray() {
+      const slides = []
+      for (let i = 0; i < this.slideCount; i += 1) slides.push(i)
+      if (!this.sliderConfig.loop) return slides
 
-      if (!this.sliderConfig.loop) {
-        return slides;
-      } else {
-        const prefixSlides = [];
-        const suffixSlides = [];
-        for (
-          let i = this.slideCount - 1;
-          i >= this.slideCount - visibleSlides;
-          i -= 1
-        )
-          prefixSlides.unshift(i);
+      const prefixSlides = []
+      const suffixSlides = []
+      const visibleSlideCount = Math.ceil(this.visibleSlideCount)
 
-        for (let i = 0; i <= visibleSlides; i += 1) suffixSlides.push(i);
+      for (
+        let i = this.slideCount - 1;
+        i >= this.slideCount - visibleSlideCount;
+        i -= 1
+      )
+        prefixSlides.unshift(i)
 
-        return [...prefixSlides, ...slides, ...suffixSlides];
-      }
+      for (let i = 0; i <= visibleSlideCount * 2; i += 1) suffixSlides.push(i)
+
+      return [...prefixSlides, ...slides, ...suffixSlides]
     },
     /**
      * Returns the CSS Styles for the individual slides.
@@ -106,68 +119,68 @@ export default {
      */
     cSlideStyles() {
       return {
-        minWidth: this.isStatic ? null : `${100 / this.visibleSlides}%`,
-        width: this.isStatic ? null : `${100 / this.visibleSlides}%`,
+        minWidth: this.isStatic ? null : `${100 / this.visibleSlideCount}%`,
+        width: this.isStatic ? null : `${100 / this.visibleSlideCount}%`,
         paddingLeft: this.getSlidePadding(this.sliderConfig.slidePadding),
-        paddingRight: this.getSlidePadding(this.sliderConfig.slidePadding),
-      };
+        paddingRight: this.getSlidePadding(this.sliderConfig.slidePadding)
+      }
     },
     /**
      * Returns the CSS Styles for the carousel cycle.
      * Only styles if not static.
      */
     cCycleStyles() {
-      if (this.isStatic) return null;
+      if (this.isStatic) return null
 
-      let transform;
+      let transform
 
       if (this.dragPosition) {
         transform =
-          (this.currentSlide * this.carouselWidth) / this.visibleSlides -
-          this.dragPosition;
+          (this.currentSlide * this.carouselWidth) / this.visibleSlideCount -
+          this.dragPosition
       } else {
         transform =
-          (this.currentSlide * this.carouselWidth) / this.visibleSlides;
+          (this.currentSlide * this.carouselWidth) / this.visibleSlideCount
       }
       return {
         transform: `translateX(-${transform}px)`,
-        transition: this.disableTransition || this.dragPosition ? 'none' : null,
-      };
-    },
+        transition: this.disableTransition || this.dragPosition ? 'none' : null
+      }
+    }
   },
   watch: {
     currentWindowWidth() {
-      this.setCurrentBreakpoint();
-      this.setCarouselWidth();
+      this.setCurrentBreakpoint()
+      this.setCarouselWidth()
     },
     currentBreakpoint() {
-      this.setVisibleSlides(this.sliderConfig.slidesVisible);
-      this.setIsStatic();
-    },
+      this.setvisibleSlideCount(this.sliderConfig.slidesVisible)
+      this.setIsStatic()
+    }
   },
   created() {
-    this.setUpConfig();
-    this.setSlideCount();
+    this.setUpConfig()
+    this.setSlideCount()
   },
   mounted() {
-    this.recordCurrentWindowWidth();
-    this.setCurrentBreakpoint();
-    this.setIsStatic();
-    this.setCarouselWidth();
-    this.setVisibleSlides(this.sliderConfig.slidesVisible);
+    this.recordCurrentWindowWidth()
+    this.setCurrentBreakpoint()
+    this.setIsStatic()
+    this.setCarouselWidth()
+    this.setvisibleSlideCount(this.sliderConfig.slidesVisible)
 
     if (isTrue(this.sliderConfig.loop)) {
-      this.setCurrentSlide(Math.ceil(this.visibleSlides));
+      this.setCurrentSlide(Math.ceil(this.visibleSlideCount))
     } else {
-      this.setCurrentSlide(0);
+      this.setCurrentSlide(0)
     }
 
-    this.addTouchEventListeners();
-    this.addResizeListener();
+    this.addTouchEventListeners()
+    this.addResizeListener()
   },
   updated() {
-    this.setSlideCount();
-    this.setCarouselWidth();
+    this.setSlideCount()
+    this.setCarouselWidth()
   },
   methods: {
     /**
@@ -176,28 +189,32 @@ export default {
      */
     setUpConfig() {
       const defaultConfig = () => ({
+        controls: {
+          previous: '&lt;',
+          next: '&gt;'
+        },
         loop: true,
         slidePadding: {
           xs: null,
           sm: null,
           md: null,
           lg: null,
-          xl: null,
+          xl: null
         },
         slidesVisible: {
           xs: 1,
           sm: null,
           md: null,
           lg: null,
-          xl: null,
+          xl: null
         },
         staticBreakpoint: null,
-        whitePagination: false,
-      });
+        whitePagination: false
+      })
       this.sliderConfig = Object.assign(
         {},
-        merge(defaultConfig(), this.$props.config),
-      );
+        merge(defaultConfig(), this.$props.config)
+      )
     },
     /**
      * Apply a resize event listener to update the current
@@ -206,23 +223,23 @@ export default {
     addResizeListener() {
       if (window) {
         window.addEventListener('resize', () => {
-          this.recordCurrentWindowWidth();
-        });
+          this.recordCurrentWindowWidth()
+        })
       }
     },
     /**
      * Records the current width of documentElement.
      */
     recordCurrentWindowWidth() {
-      this.currentWindowWidth = document.documentElement.clientWidth;
+      this.currentWindowWidth = document.documentElement.clientWidth
     },
     /**
      * Filter breakpoints to find current breakpoint using
      * currentWindowWidth.
      */
     setCurrentBreakpoint() {
-      const { currentWindowWidth, breakpoints } = this;
-      const { sm, md, lg, xl } = breakpoints;
+      const { currentWindowWidth, breakpoints } = this
+      const { sm, md, lg, xl } = breakpoints
 
       // Do not change order as the find() function will return
       // the first breakpoint that matches its conditions.
@@ -231,21 +248,29 @@ export default {
         { breakpoint: 'lg', min: lg },
         { breakpoint: 'md', min: md },
         { breakpoint: 'sm', min: sm },
-        { breakpoint: 'xs', min: 0 },
-      ];
+        { breakpoint: 'xs', min: 0 }
+      ]
 
       const currentBreakpointObject = breakpointsArray.find(
         breakpointObject => {
-          return currentWindowWidth >= breakpointObject.min;
-        },
-      );
-      this.currentBreakpoint = currentBreakpointObject.breakpoint;
+          return currentWindowWidth >= breakpointObject.min
+        }
+      )
+      this.currentBreakpoint = currentBreakpointObject.breakpoint
     },
     setCurrentSlide(slideNumber) {
-      this.currentSlide = slideNumber;
+      this.currentSlide = slideNumber
     },
+    /**
+     * Calculate slide count based on slots passed. Slides
+     * should be named with integers with base-zero i.e 0,1,2...
+     * New slots added should be filtered out in this method to
+     * ensure slide count is correct.
+     */
     setSlideCount() {
-      this.slideCount = Object.keys(this.$slots).length;
+      this.slideCount = Object.keys(this.$slots).filter(
+        key => key !== 'previous' && key !== 'next'
+      ).length
     },
     /**
      * Set the width of the carousel as a data property. This is
@@ -253,7 +278,7 @@ export default {
      * Called on mounted() and on window resize.
      */
     setCarouselWidth() {
-      this.carouselWidth = this.$refs['v-carousel'].clientWidth;
+      this.carouselWidth = this.$refs['v-carousel-wrap'].clientWidth
     },
     /**
      * Gets the current breakpoint and slider config to
@@ -266,23 +291,23 @@ export default {
      * @param {number} arg.lg Number of slides visible at desktop
      * @param {number} arg.xl Number of slides visible at large desktop (1600px)
      */
-    setVisibleSlides({ xs, sm, md, lg, xl }) {
+    setvisibleSlideCount({ xs, sm, md, lg, xl }) {
       switch (this.currentBreakpoint) {
         case 'xl':
-          this.visibleSlides = xl || lg || md || sm || xs;
-          break;
+          this.visibleSlideCount = xl || lg || md || sm || xs
+          break
         case 'lg':
-          this.visibleSlides = lg || md || sm || xs;
-          break;
+          this.visibleSlideCount = lg || md || sm || xs
+          break
         case 'md':
-          this.visibleSlides = md || sm || xs;
-          break;
+          this.visibleSlideCount = md || sm || xs
+          break
         case 'sm':
-          this.visibleSlides = sm || xs;
-          break;
+          this.visibleSlideCount = sm || xs
+          break
         default:
-          this.visibleSlides = xs; // Set to 1 by default in props
-          break;
+          this.visibleSlideCount = xs // Set to 1 by default in props
+          break
       }
     },
     /**
@@ -292,33 +317,33 @@ export default {
      * is set, this will also affect tablet and desktop.
      */
     setIsStatic() {
-      let isStatic = false;
+      let isStatic = false
 
       switch (this.currentBreakpoint) {
         case 'xl':
           isStatic = ['xs', 'sm', 'md', 'lg', 'xl'].includes(
-            this.sliderConfig.staticBreakpoint,
-          );
-          break;
+            this.sliderConfig.staticBreakpoint
+          )
+          break
         case 'lg':
           isStatic = ['xs', 'sm', 'md', 'lg'].includes(
-            this.sliderConfig.staticBreakpoint,
-          );
-          break;
+            this.sliderConfig.staticBreakpoint
+          )
+          break
         case 'md':
           isStatic = ['xs', 'sm', 'md'].includes(
-            this.sliderConfig.staticBreakpoint,
-          );
-          break;
+            this.sliderConfig.staticBreakpoint
+          )
+          break
         case 'sm':
-          isStatic = ['xs', 'sm'].includes(this.sliderConfig.staticBreakpoint);
-          break;
+          isStatic = ['xs', 'sm'].includes(this.sliderConfig.staticBreakpoint)
+          break
         default:
-          isStatic = ['xs'].includes(this.sliderConfig.staticBreakpoint);
-          break;
+          isStatic = ['xs'].includes(this.sliderConfig.staticBreakpoint)
+          break
       }
 
-      this.isStatic = isStatic;
+      this.isStatic = isStatic
     },
     /**
      * Gets the current breakpoint and slider config to
@@ -333,56 +358,63 @@ export default {
      * @param {string} arg.xl Slide padding at large desktop (1600px)
      */
     getSlidePadding({ xs, sm, md, lg, xl }) {
-      let padding = null;
+      let padding = null
 
       switch (this.currentBreakpoint) {
         case 'xl':
-          padding = xl || lg || md || sm || xs;
-          break;
+          padding = xl || lg || md || sm || xs
+          break
         case 'lg':
-          padding = lg || md || sm || xs;
-          break;
+          padding = lg || md || sm || xs
+          break
         case 'md':
-          padding = md || sm || xs;
-          break;
+          padding = md || sm || xs
+          break
         case 'sm':
-          padding = sm || xs;
-          break;
+          padding = sm || xs
+          break
         default:
-          padding = xs;
-          break;
+          padding = xs
+          break
       }
-      return padding;
+      return padding
     },
     /**
      * Uses data properties on the component to store co-ordinates
      * and timestamps to detirmine the direction of the touch swipe.
      */
     addTouchEventListeners() {
-      const carousel = this.$refs['v-carousel'];
+      const carousel = this.$refs['v-carousel-wrap']
 
       carousel.addEventListener('touchstart', e => {
-        this.touchEvent.swipeStartPosition = e.changedTouches['0'].pageX;
-        this.touchEvent.startTimeStamp = e.timeStamp;
-      });
+        this.touchEvent.swipeStartPosition = e.changedTouches['0'].pageX
+        this.touchEvent.startTimeStamp = e.timeStamp
+      })
 
       carousel.addEventListener('touchend', e => {
-        this.touchEvent.swipeEndPosition = e.changedTouches['0'].pageX;
-        this.touchEvent.endTimeStamp = e.timeStamp;
-        this.handleTouchEvent();
-      });
+        this.touchEvent.swipeEndPosition = e.changedTouches['0'].pageX
+        this.touchEvent.endTimeStamp = e.timeStamp
+        this.handleTouchEvent()
+      })
 
       carousel.addEventListener(
         'touchmove',
         e => {
-          e.preventDefault();
+          e.preventDefault()
           this.touchEvent.swipeMovePosition =
-            e.changedTouches['0'].pageX - this.touchEvent.swipeStartPosition;
-          this.touchEvent.moveTimeStamp = e.timeStamp;
-          this.handleTouchEvent();
+            e.changedTouches['0'].pageX - this.touchEvent.swipeStartPosition
+          this.touchEvent.moveTimeStamp = e.timeStamp
+          this.handleTouchEvent()
         },
-        { passive: false },
-      );
+        { passive: false }
+      )
+    },
+    handleControlBtnClick(increment) {
+      if (isTrue(this.sliderConfig.loop)) {
+        this.handlePaginationWithLoop(increment)
+      } else {
+        this.handlePagination(increment)
+      }
     },
     /**
      * Handle logic from touch end and move events.
@@ -392,15 +424,15 @@ export default {
     handleTouchEvent() {
       // Do not allow swiping if carousel is in the process of skipping
       // slides as this will cause the carousel to swipe past last slide.
-      if (this.isSkippingSlides) return;
+      if (this.isSkippingSlides) return
 
       if (
         !this.touchEvent.endTimeStamp ||
         this.touchEvent.endTimeStamp < this.touchEvent.moveTimeStamp
       ) {
-        this.setDragPosition(this.touchEvent.swipeMovePosition);
+        this.setDragPosition(this.touchEvent.swipeMovePosition)
       } else {
-        this.handleTouchSlide();
+        this.handleTouchSlide()
       }
     },
     /**
@@ -408,7 +440,7 @@ export default {
      * @param {number} position Distance in pixels the carousel cycle is dragged.
      */
     setDragPosition(position) {
-      this.dragPosition = position;
+      this.dragPosition = position
     },
     /**
      * Handle the logic for moving the carousel cycle based on user touch slide.
@@ -418,24 +450,24 @@ export default {
      */
     handleTouchSlide() {
       // Reset drag position to prevent inteference.
-      this.setDragPosition(null);
-      const startPos = this.touchEvent.swipeStartPosition;
-      const endPos = this.touchEvent.swipeEndPosition;
+      this.setDragPosition(null)
+      const startPos = this.touchEvent.swipeStartPosition
+      const endPos = this.touchEvent.swipeEndPosition
 
       // Return if touch was not a long enough full swipe.
-      if (Math.abs(startPos - endPos) <= 10) return;
+      if (Math.abs(startPos - endPos) <= 10) return
 
-      const allowedTime = 2000;
+      const allowedTime = 2000
       const swipeTime =
-        this.touchEvent.endTimeStamp - this.touchEvent.startTimeStamp;
+        this.touchEvent.endTimeStamp - this.touchEvent.startTimeStamp
 
       if (swipeTime < allowedTime) {
-        const increment = this.calculateTouchSlideIncrement(this.touchEvent);
+        const increment = this.calculateTouchSlideIncrement(this.touchEvent)
 
         if (isTrue(this.sliderConfig.loop)) {
-          this.handlePaginationWithLoop(increment);
+          this.handlePaginationWithLoop(increment)
         } else {
-          this.handlePagination(increment);
+          this.handlePagination(increment)
         }
       }
     },
@@ -448,19 +480,19 @@ export default {
      * @return {number} Number of slides to increment carousel.
      */
     calculateTouchSlideIncrement({ swipeStartPosition, swipeEndPosition }) {
-      const swipeDiff = swipeEndPosition - swipeStartPosition;
-      const itemWidth = this.carouselWidth / this.visibleSlides;
-      let increment = 0;
+      const swipeDiff = swipeEndPosition - swipeStartPosition
+      const itemWidth = this.carouselWidth / this.visibleSlideCount
+      let increment = 0
       if (swipeDiff / itemWidth < 0.5 && swipeDiff / itemWidth > -0.5) {
         const quickSwipeTime =
-          this.touchEvent.endTimeStamp - this.touchEvent.startTimeStamp;
+          this.touchEvent.endTimeStamp - this.touchEvent.startTimeStamp
         if (quickSwipeTime < 700) {
-          increment = swipeDiff / itemWidth < 0 ? 1 : -1;
+          increment = swipeDiff / itemWidth < 0 ? 1 : -1
         }
       } else {
-        increment = -Math.round(swipeDiff / itemWidth);
+        increment = -Math.round(swipeDiff / itemWidth)
       }
-      return increment;
+      return increment
     },
     /**
      * Set the current slide using the direction and current
@@ -471,18 +503,18 @@ export default {
     handlePagination(increment) {
       if (increment < 0) {
         if (this.currentSlide + increment > 0) {
-          this.setCurrentSlide(this.currentSlide + increment);
+          this.setCurrentSlide(Math.floor(this.currentSlide + increment))
         } else {
-          this.setCurrentSlide(0);
+          this.setCurrentSlide(0)
         }
       } else {
         if (
           this.currentSlide + increment <
-          this.slideCount - this.visibleSlides
+          this.slideCount - this.visibleSlideCount
         ) {
-          this.setCurrentSlide(this.currentSlide + increment);
+          this.setCurrentSlide(this.currentSlide + increment)
         } else {
-          this.setCurrentSlide(this.slideCount - this.visibleSlides);
+          this.setCurrentSlide(this.slideCount - this.visibleSlideCount)
         }
       }
     },
@@ -495,69 +527,79 @@ export default {
      * @param {number} increment Number of slides the carousel should increment by.
      */
     handlePaginationWithLoop(increment) {
+      if (this.isSkippingSlides) return
+
       if (increment < 0) {
-        if (this.currentSlide + increment < Math.ceil(this.visibleSlides)) {
-          this.isSkippingSlides = true;
+        if (this.currentSlide + increment < Math.ceil(this.visibleSlideCount)) {
+          this.isSkippingSlides = true
           this.$refs.cycle.addEventListener(
             'transitionend',
             () => {
-              this.skipToSlide(this.slideCount + this.currentSlide);
+              this.skipToSlide(this.slideCount + this.currentSlide)
             },
-            { once: true },
-          );
+            { once: true }
+          )
         }
-        this.setCurrentSlide(this.currentSlide + increment);
+        this.setCurrentSlide(this.currentSlide + increment)
       } else {
         if (
           this.currentSlide + increment >
-          this.slideCount + Math.ceil(this.visibleSlides) - 1
+          this.slideCount + Math.ceil(this.visibleSlideCount) - 1
         ) {
-          this.isSkippingSlides = true;
+          this.isSkippingSlides = true
           this.$refs.cycle.addEventListener(
             'transitionend',
             () => {
-              this.skipToSlide(this.currentSlide - this.slideCount);
+              this.skipToSlide(this.currentSlide - this.slideCount)
             },
-            { once: true },
-          );
+            { once: true }
+          )
         }
-        this.setCurrentSlide(this.currentSlide + increment);
+        this.setCurrentSlide(this.currentSlide + increment)
       }
     },
     /**
      * Change active slide in carousel without animating.
      * @param {number} slide The slide to set as active.
      */
-    skipToSlide(slide) {
-      this.isSkippingSlides = true;
-      this.disableAnimation();
-      this.$nextTick().then(() => {
-        this.setCurrentSlide(slide);
-        this.$nextTick().then(() => {
-          this.enableAnimation();
-          this.isSkippingSlides = false;
-        });
-      });
+    async skipToSlide(slide) {
+      this.isSkippingSlides = true
+      this.disableAnimation()
+      await this.$nextTick()
+      this.setCurrentSlide(slide)
+      await this.$nextTick()
+      this.enableAnimation()
+      this.isSkippingSlides = false
     },
     /**
      * Prevent the carousel transition from animating.
      */
     disableAnimation() {
-      this.disableTransition = true;
+      this.disableTransition = true
     },
     /**
      * Enable the carousel transition to animate.
      */
     enableAnimation() {
-      this.disableTransition = false;
+      this.disableTransition = false
     },
-  },
-};
+    isButtonDisabled(button) {
+      if (isTrue(this.sliderConfig.loop)) return false
+
+      if (this.currentSlide === 0 && button === 'prev') return true
+      if (
+        this.currentSlide === this.slideCount - this.visibleSlideCount &&
+        button === 'next'
+      )
+        return true
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
 .v-carousel {
-  overflow: hidden;
+  position: relative;
 
   // Fallback slide width styles
   &:not(.v-carousel--static) {
@@ -568,9 +610,31 @@ export default {
   }
 }
 
+.v-carousel__wrap {
+  overflow: hidden;
+}
+
 .v-carousel__cycle {
   display: flex;
   transition: transform ease 0.5s;
+}
+
+.v-carousel__controls__btn {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 10;
+
+  &--next {
+    left: auto;
+    right: 0;
+  }
+
+  &--disabled {
+    pointer-events: none;
+    opacity: 0.2;
+  }
 }
 
 // Default padding can be overwritten by props
