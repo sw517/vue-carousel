@@ -208,8 +208,7 @@ export default {
           lg: null,
           xl: null
         },
-        staticBreakpoint: null,
-        whitePagination: false
+        staticBreakpoint: null
       })
       this.sliderConfig = Object.assign(
         {},
