@@ -70,13 +70,6 @@ Any valid CSS unit of measurement i.e "px" or "em".
 `Number`
 Any integer or decimal number.
 
-<style>
-  pre.cb {
-    min-width: 250px;
-    font-size: 0.8rem;
-  }
-</style>
-
 <table>
   <thead>
     <th>Key</th>
@@ -91,7 +84,7 @@ Any integer or decimal number.
       <td><pre>controls</pre></td>
       <td>Object</td>
       <td>
-<pre class="cb">
+<pre style="font-size: 0.8rem">
 {
   previous: "&lt;",
   next: "&gt;"
@@ -99,7 +92,7 @@ Any integer or decimal number.
 </pre>
       </td>
       <td>
-<pre class="cb">
+<pre style="font-size: 0.8rem">
 {
   previous: [String],
   next: [String]
@@ -112,8 +105,8 @@ Any integer or decimal number.
     <tr>
       <td><pre>loop</pre></td>
       <td>Boolean</td>
-      <td><pre class="cb">true</pre></td>
-      <td><pre class="cb">true | false</pre></td>
+      <td><pre style="font-size: 0.8rem">true</pre></td>
+      <td><pre style="font-size: 0.8rem">true | false</pre></td>
       <td>Determines if the carousel should loop infintely. If false, carousel will only animate between first and last slide.</td>
     </tr>
     <!-- slidePadding -->
@@ -121,7 +114,7 @@ Any integer or decimal number.
       <td><pre>slidePadding</pre></td>
       <td>Object</td>
       <td>
-<pre class="cb">
+<pre style="font-size: 0.8rem">
 {
   xs: null,
   sm: null,
@@ -132,7 +125,7 @@ Any integer or decimal number.
 </pre>
       </td>
       <td>
-<pre class="cb">
+<pre style="font-size: 0.8rem">
 {
   [Breakpoint]: "[Number][Unit]"
 }
@@ -151,7 +144,7 @@ Any integer or decimal number.
       <td><pre>slidesVisible</pre></td>
       <td>Object</td>
       <td>
-<pre class="cb">
+<pre style="font-size: 0.8rem">
 {
   xs: 1,
   sm: null,
@@ -162,7 +155,7 @@ Any integer or decimal number.
 </pre>
       </td>
       <td>
-<pre class="cb">
+<pre style="font-size: 0.8rem">
 {
   [Breakpoint]: [Number]
 }
@@ -174,8 +167,8 @@ Any integer or decimal number.
     <tr>
       <td><pre>staticBreakpoint</pre></td>
       <td>String</td>
-      <td><pre class="cb">null</pre></td>
-      <td><pre class="cb">null | "xs" | "sm" | "md" | "lg" | "xl"</pre></td></pre></td>
+      <td><pre style="font-size: 0.8rem">null</pre></td>
+      <td><pre style="font-size: 0.8rem">null | "xs" | "sm" | "md" | "lg" | "xl"</pre></td></pre></td>
       <td>Change the number of slides visible at specific breakpoints. The number can be a whole number of decimal. If a breakpoint is null, the carousel will use the value from a previous breakpoint.</td>
     </tr>
   </tbody>
