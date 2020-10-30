@@ -148,8 +148,8 @@ Any valid CSS value
       <td>
 <pre style="font-size: 0.8rem">
 {
-  previous: "&lt;",
-  next: "&gt;",
+  previous: "&amp;lt;",
+  next: "&amp;gt;",
   styles: null
 }
 </pre>
@@ -159,7 +159,9 @@ Any valid CSS value
 {
   previous: [String],
   next: [String],
-  styles: null || {[cssProperty]: ['css-value`]}
+  styles: {
+    [cssProperty]: ['css-value`]
+  }
 }
 </pre>
       </td>
