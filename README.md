@@ -84,25 +84,25 @@ Any valid CSS value
     <th>Description</th>
   </thead>
   <tbody>
-    <!-- autoSlide -->
+    <!-- autoplay -->
     <tr>
-      <td><pre>autoSlide</pre></td>
+      <td><pre>autoplay</pre></td>
       <td>Boolean</td>
       <td><pre style="font-size: 0.8rem; min-width: 250px">false</pre></td>
       </td>
-      <td>Detirmines if the carousel will slide automatically based on `autoSlideInterval`.</td>
+      <td>Detirmines if the carousel will slide automatically based on `autoplayInterval`.</td>
     </tr>
-    <!-- autoSlideHoverPause -->
+    <!-- autoplayHoverPause -->
     <tr>
-      <td><pre>autoSlideHoverPause</pre></td>
+      <td><pre>autoplayHoverPause</pre></td>
       <td>Boolean</td>
       <td><pre style="font-size: 0.8rem; min-width: 250px">false</pre></td>
       </td>
       <td>Detirmines if the carousel should stop auto sliding when the mouse hovers the carousel.</td>
     </tr>
-    <!-- autoSlideInterval -->
+    <!-- autoplayInterval -->
     <tr>
-      <td><pre>autoSlideInterval</pre></td>
+      <td><pre>autoplayInterval</pre></td>
       <td>Number</td>
       <td><pre style="font-size: 0.8rem; min-width: 250px">3000</pre></td>
       </td>

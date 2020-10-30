@@ -74,7 +74,7 @@ export default {
   },
   data() {
     return {
-      autoSlideIntervalId: null,
+      autoplayIntervalId: null,
       carouselWidth: null,
       currentBreakpoint: 'xs',
       currentSlide: 0,
@@ -198,9 +198,9 @@ export default {
      */
     setUpConfig() {
       const defaultConfig = () => ({
-        autoSlide: false,
-        autoSlideHoverPause: true,
-        autoSlideInterval: 3000,
+        autoplay: false,
+        autoplayHoverPause: true,
+        autoplayInterval: 3000,
         breakpoints: {
           xs: 0,
           sm: 600,
@@ -466,24 +466,24 @@ export default {
       return padding
     },
     /**
-     * If autoSlide is true, set an interval to automatically
+     * If autoplay is true, set an interval to automatically
      * increment the current slide.
      */
     addAutoSlideInterval() {
-      if (this.sliderConfig.autoSlide && !this.autoSlideIntervalId) {
-        this.autoSlideIntervalId = setInterval(
+      if (this.sliderConfig.autoplay && !this.autoplayIntervalId) {
+        this.autoplayIntervalId = setInterval(
           this.autoIncrement,
-          this.sliderConfig.autoSlideInterval
+          this.sliderConfig.autoplayInterval
         )
       }
     },
     /**
-     * If autoSlide is true, remove the interval which automatically
+     * If autoplay is true, remove the interval which automatically
      * increments the current slide.
      */
     removeAutoSlideInterval() {
-      if (this.sliderConfig.autoSlide) {
-        clearInterval(this.autoSlideIntervalId)
+      if (this.sliderConfig.autoplay) {
+        clearInterval(this.autoplayIntervalId)
       }
     },
     /**
