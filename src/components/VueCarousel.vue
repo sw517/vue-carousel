@@ -189,14 +189,9 @@ export default {
   },
   beforeDestroy() {
     this.removeResizeListener()
+    this.removeAutoSlideInterval()
   },
   methods: {
-    onMouseEnter() {
-      console.log('enter')
-    },
-    onMouseLeave() {
-      console.log('leave')
-    },
     /**
      * Merges default slider config and custom props config
      * into one configuration object used by the component.
@@ -475,7 +470,7 @@ export default {
      * increment the current slide.
      */
     addAutoSlideInterval() {
-      if (this.sliderConfig.autoSlide) {
+      if (this.sliderConfig.autoSlide && !this.autoSlideIntervalId) {
         this.autoSlideIntervalId = setInterval(
           this.autoIncrement,
           this.sliderConfig.autoSlideInterval
