@@ -144,8 +144,8 @@ Any valid CSS value
         Example:
 <pre style="font-size: 0.8rem; min-width: 250px">
 {
-  previous: '<i class="fa fa-arrow-left">',
-  next: '<i class="fa fa-arrow-right">',
+  previous: "&lt;i class=\"fa fa-arrow-left\" /&gt;",
+  next: "&lt;i class=\"fa fa-arrow-right\" /&gt;",
   styles: {
     background-color: '#000',
     color: 'white',
@@ -179,9 +179,11 @@ Any valid CSS value
       </td>
       <td>
         Change the padding between slides for specific breakpoints. Ensure a unit of measurement is included in the value.<br/>
-        "20px" ✓<br/>
-        "20em" ✓<br/>
-        "20" X<br/>
+<pre style="font-size: 0.8rem; min-width: 250px">
+"20px" ✓
+"20em" ✓
+"20" X
+</pre>
         If all breakpoints are null (default), a fallback CSS padding value is used.
       </td>
     </tr>
