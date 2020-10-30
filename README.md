@@ -81,7 +81,6 @@ Any valid CSS value
     <th>Key</th>
     <th>Type</th>
     <th>Default Value</th>
-    <th>Optional Values</th>
     <th>Description</th>
   </thead>
   <tbody>
@@ -89,8 +88,7 @@ Any valid CSS value
     <tr>
       <td><pre>autoSlide</pre></td>
       <td>Boolean</td>
-      <td><pre style="font-size: 0.8rem">true</pre></td>
-      <td><pre style="font-size: 0.8rem">true | false</pre></td>
+      <td><pre style="font-size: 0.8rem; min-width: 250px">false</pre></td>
       </td>
       <td>Detirmines if the carousel will slide automatically based on `autoSlideInterval`.</td>
     </tr>
@@ -98,17 +96,15 @@ Any valid CSS value
     <tr>
       <td><pre>autoSlideHoverPause</pre></td>
       <td>Boolean</td>
-      <td><pre style="font-size: 0.8rem">true</pre></td>
-      <td><pre style="font-size: 0.8rem">true | false</pre></td>
+      <td><pre style="font-size: 0.8rem; min-width: 250px">false</pre></td>
       </td>
       <td>Detirmines if the carousel should stop auto sliding when the mouse hovers the carousel.</td>
     </tr>
     <!-- autoSlideInterval -->
     <tr>
       <td><pre>autoSlideInterval</pre></td>
-      <td>Boolean</td>
-      <td><pre style="font-size: 0.8rem">3000</pre></td>
-      <td><pre style="font-size: 0.8rem">[Number]</pre></td>
+      <td>Number</td>
+      <td><pre style="font-size: 0.8rem; min-width: 250px">3000</pre></td>
       </td>
       <td>Changes the timing for auto slide in milliseconds.</td>
     </tr>
@@ -117,24 +113,13 @@ Any valid CSS value
       <td><pre>breakpoints</pre></td>
       <td>Object</td>
       <td>
-<pre style="font-size: 0.8rem">
+<pre style="font-size: 0.8rem; min-width: 250px">
 {
   xs: 0,
   sm: 600,
   md: 980,
   lg: 1200,
   xl: 1600
-}
-</pre>
-      </td>
-      <td>
-<pre style="font-size: 0.8rem">
-{
-  xs: [Number],
-  sm: [Number],
-  md: [Number],
-  lg: [Number],
-  xl: [Number]
 }
 </pre>
       </td>
@@ -146,7 +131,7 @@ Any valid CSS value
       <td><pre>controls</pre></td>
       <td>Object</td>
       <td>
-<pre style="font-size: 0.8rem">
+<pre style="font-size: 0.8rem; min-width: 250px">
 {
   previous: "&amp;lt;",
   next: "&amp;gt;",
@@ -155,24 +140,26 @@ Any valid CSS value
 </pre>
       </td>
       <td>
-<pre style="font-size: 0.8rem">
+        Change the contents and styles of the previous/next controls for the carousel. HTML can be passed in a String.<br/> Styles must be passed as an object.
+        Example:
+<pre style="font-size: 0.8rem; min-width: 250px">
 {
-  previous: [String],
-  next: [String],
+  previous: '<i class="fa fa-arrow-left">',
+  next: '<i class="fa fa-arrow-right">',
   styles: {
-    [cssProperty]: ['css-value`]
+    background-color: '#000',
+    color: 'white',
+    border-radius: '10px'
   }
 }
 </pre>
       </td>
-      <td>Change the contents of the previous/next controls for the carousel. HTML can be passed in a String.</td>
     </tr>
     <!-- loop -->
     <tr>
       <td><pre>loop</pre></td>
       <td>Boolean</td>
-      <td><pre style="font-size: 0.8rem">true</pre></td>
-      <td><pre style="font-size: 0.8rem">true | false</pre></td>
+      <td><pre style="font-size: 0.8rem; min-width: 250px">false</pre></td>
       <td>Determines if the carousel should loop infintely. If false, carousel will only animate between first and last slide.</td>
     </tr>
     <!-- slidePadding -->
@@ -180,20 +167,13 @@ Any valid CSS value
       <td><pre>slidePadding</pre></td>
       <td>Object</td>
       <td>
-<pre style="font-size: 0.8rem">
+<pre style="font-size: 0.8rem; min-width: 250px">
 {
   xs: null,
   sm: null,
   md: null,
   lg: null,
   xl: null
-}
-</pre>
-      </td>
-      <td>
-<pre style="font-size: 0.8rem">
-{
-  [Breakpoint]: "[Number][Unit]"
 }
 </pre>
       </td>
@@ -210,7 +190,7 @@ Any valid CSS value
       <td><pre>slidesVisible</pre></td>
       <td>Object</td>
       <td>
-<pre style="font-size: 0.8rem">
+<pre style="font-size: 0.8rem; min-width: 250px">
 {
   xs: 1,
   sm: null,
@@ -220,22 +200,18 @@ Any valid CSS value
 }
 </pre>
       </td>
-      <td>
-<pre style="font-size: 0.8rem">
-{
-  [Breakpoint]: [Number]
-}
-</pre>
-      </td>
-      <td>Change the number of slides visible at specific breakpoints. The number can be a whole number of decimal. If a breakpoint is null, the carousel will use the value from a previous breakpoint.</td>
+      <td>Change the number of slides visible at specific breakpoints. The number can be a whole number or decimal. If a breakpoint is null, the carousel will use the value from a previous breakpoint.</td>
     </tr>
     <!-- staticBreakpoint -->
     <tr>
       <td><pre>staticBreakpoint</pre></td>
       <td>String</td>
-      <td><pre style="font-size: 0.8rem">null</pre></td>
-      <td><pre style="font-size: 0.8rem">null | "xs" | "sm" | "md" | "lg" | "xl"</pre></td></pre></td>
-      <td>Change the number of slides visible at specific breakpoints. The number can be a whole number of decimal. If a breakpoint is null, the carousel will use the value from a previous breakpoint.</td>
+      <td><pre style="font-size: 0.8rem; min-width: 250px">null</pre></td>
+      <td>
+        Removes the carousel functionality and animation at the specified breakpoint and shows all items on screen.</br>
+        Optional Values:
+        <pre style="font-size: 0.8rem; min-width: 250px">null | "xs" | "sm" | "md" | "lg" | "xl"</pre></td></pre>
+      </td>
     </tr>
   </tbody>
 </table>
