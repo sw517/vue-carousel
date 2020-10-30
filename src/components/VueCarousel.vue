@@ -1,8 +1,16 @@
 <template>
-  <div class="v-carousel" :class="[{ 'v-carousel--static': isStatic }]">
+  <div
+    @mouseenter="removeAutoSlideInterval"
+    @mouseleave="addAutoSlideInterval"
+    @mousedown="removeAutoSlideInterval"
+    @mouseup="addAutoSlideInterval"
+    :class="[{ 'v-carousel--static': isStatic }]"
+    class="v-carousel"
+  >
     <div class="v-carousel__controls" v-if="!isStatic">
       <VueCarouselButton
         @click.native="handleControlBtnClick(-1)"
+        :style="sliderConfig.controls.styles"
         aria-label="Previous Slide"
         class="v-carousel__controls__btn v-carousel__controls__btn--prev"
         :class="{
@@ -10,11 +18,12 @@
         }"
       >
         <slot name="previous">
-          <span v-html="this.sliderConfig.controls.previous" />
+          <span v-html="sliderConfig.controls.previous" />
         </slot>
       </VueCarouselButton>
       <VueCarouselButton
         @click.native="handleControlBtnClick(1)"
+        :style="sliderConfig.controls.styles"
         aria-label="Next Slide"
         class="v-carousel__controls__btn v-carousel__controls__btn--next"
         :class="{
@@ -22,7 +31,7 @@
         }"
       >
         <slot name="next">
-          <span v-html="this.sliderConfig.controls.next" />
+          <span v-html="sliderConfig.controls.next" />
         </slot>
       </VueCarouselButton>
     </div>
@@ -44,6 +53,7 @@
 <script>
 // Helpers
 import merge from 'lodash.merge'
+import cloneDeep from 'lodash.clonedeep'
 import isTrue from '@/scripts/helpers/isTrue'
 // Components
 import VueCarouselButton from '@/components/VueCarouselButton'
@@ -64,13 +74,7 @@ export default {
   },
   data() {
     return {
-      breakpoints: {
-        xs: 0,
-        sm: 600,
-        md: 980,
-        lg: 1200,
-        xl: 1600
-      },
+      autoSlideIntervalId: null,
       carouselWidth: null,
       currentBreakpoint: 'xs',
       currentSlide: 0,
@@ -154,7 +158,7 @@ export default {
       this.setCarouselWidth()
     },
     currentBreakpoint() {
-      this.setvisibleSlideCount(this.sliderConfig.slidesVisible)
+      this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
       this.setIsStatic()
     }
   },
@@ -167,7 +171,7 @@ export default {
     this.setCurrentBreakpoint()
     this.setIsStatic()
     this.setCarouselWidth()
-    this.setvisibleSlideCount(this.sliderConfig.slidesVisible)
+    this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
 
     if (isTrue(this.sliderConfig.loop)) {
       this.setCurrentSlide(Math.ceil(this.visibleSlideCount))
@@ -177,21 +181,42 @@ export default {
 
     this.addTouchEventListeners()
     this.addResizeListener()
+    this.addAutoSlideInterval()
   },
   updated() {
     this.setSlideCount()
     this.setCarouselWidth()
   },
+  beforeDestroy() {
+    this.removeResizeListener()
+  },
   methods: {
+    onMouseEnter() {
+      console.log('enter')
+    },
+    onMouseLeave() {
+      console.log('leave')
+    },
     /**
      * Merges default slider config and custom props config
      * into one configuration object used by the component.
      */
     setUpConfig() {
       const defaultConfig = () => ({
+        autoSlide: false,
+        autoSlideHoverPause: true,
+        autoSlideInterval: 3000,
+        breakpoints: {
+          xs: 0,
+          sm: 600,
+          md: 980,
+          lg: 1200,
+          xl: 1600
+        },
         controls: {
           previous: '&lt;',
-          next: '&gt;'
+          next: '&gt;',
+          styles: null
         },
         loop: true,
         slidePadding: {
@@ -210,10 +235,71 @@ export default {
         },
         staticBreakpoint: null
       })
+
+      const clonedPropsConfig = cloneDeep(this.$props.config)
+
+      clonedPropsConfig.breakpoints = this.validateBreakpoints(
+        clonedPropsConfig.breakpoints
+      )
+        ? clonedPropsConfig.breakpoints
+        : defaultConfig().breakpoints
+
+      clonedPropsConfig.slidesVisible = this.validateSlidesVisible(
+        clonedPropsConfig.slidesVisible
+      )
+
       this.sliderConfig = Object.assign(
         {},
-        merge(defaultConfig(), this.$props.config)
+        merge(defaultConfig(), clonedPropsConfig)
       )
+    },
+    /**
+     * Validate each breakpoint in the config object.
+     * @param {object} propsConfig The breakpoints object from props config.
+     * @return {boolean} Returns true if propsConfig is valid breakpoints object.
+     */
+    validateBreakpoints(propsConfig) {
+      if (propsConfig) {
+        try {
+          if (
+            propsConfig.xs < propsConfig.sm &&
+            propsConfig.sm < propsConfig.md &&
+            propsConfig.md < propsConfig.lg &&
+            propsConfig.lg < propsConfig.xl
+          ) {
+            return true
+          }
+
+          console.warn(
+            'Invalid breakpoints. Using default breakpoints instead.',
+            '\nconfig.breakpoints: ',
+            propsConfig
+          )
+        } catch (error) {
+          console.warn(error)
+        }
+      }
+      return false
+    },
+    /**
+     * Validate each property in the slidesVisible object from the
+     * slider config. If a value is not a number or is greater than
+     * the total number of slides, the key/value pair is removed from
+     * the object.
+     * @param {object} config The object containing the slides visible keys/values.
+     * @return {object} The validated config object
+     */
+    validateSlidesVisible(config) {
+      return Object.keys(config).reduce((acc, key) => {
+        if (typeof config[key] === 'number') {
+          acc[key] = config[key]
+        } else {
+          console.warn(
+            `Invalid slidesVisible value. \nconfig.slidesVisible.${key} must be a valid number.`
+          )
+        }
+        return acc
+      }, {})
     },
     /**
      * Apply a resize event listener to update the current
@@ -221,9 +307,15 @@ export default {
      */
     addResizeListener() {
       if (window) {
-        window.addEventListener('resize', () => {
-          this.recordCurrentWindowWidth()
-        })
+        window.addEventListener('resize', this.recordCurrentWindowWidth)
+      }
+    },
+    /**
+     * Remove resize event listener from window.
+     */
+    removeResizeListener() {
+      if (window) {
+        window.removeEventListener('resize', this.recordCurrentWindowWidth)
       }
     },
     /**
@@ -237,8 +329,8 @@ export default {
      * currentWindowWidth.
      */
     setCurrentBreakpoint() {
-      const { currentWindowWidth, breakpoints } = this
-      const { sm, md, lg, xl } = breakpoints
+      const { currentWindowWidth, sliderConfig } = this
+      const { sm, md, lg, xl } = sliderConfig.breakpoints
 
       // Do not change order as the find() function will return
       // the first breakpoint that matches its conditions.
@@ -290,7 +382,7 @@ export default {
      * @param {number} arg.lg Number of slides visible at desktop
      * @param {number} arg.xl Number of slides visible at large desktop (1600px)
      */
-    setvisibleSlideCount({ xs, sm, md, lg, xl }) {
+    setVisibleSlideCount({ xs, sm, md, lg, xl }) {
       switch (this.currentBreakpoint) {
         case 'xl':
           this.visibleSlideCount = xl || lg || md || sm || xs
@@ -379,6 +471,43 @@ export default {
       return padding
     },
     /**
+     * If autoSlide is true, set an interval to automatically
+     * increment the current slide.
+     */
+    addAutoSlideInterval() {
+      if (this.sliderConfig.autoSlide) {
+        this.autoSlideIntervalId = setInterval(
+          this.autoIncrement,
+          this.sliderConfig.autoSlideInterval
+        )
+      }
+    },
+    /**
+     * If autoSlide is true, remove the interval which automatically
+     * increments the current slide.
+     */
+    removeAutoSlideInterval() {
+      if (this.sliderConfig.autoSlide) {
+        clearInterval(this.autoSlideIntervalId)
+      }
+    },
+    /**
+     * Increment the current slide by 1. If loop is disabled, reset
+     * the current slide to the first slide when the carousel reaches
+     * the last slide.
+     */
+    autoIncrement() {
+      if (this.sliderConfig.loop) {
+        this.handlePaginationWithLoop(1)
+      } else {
+        if (this.currentSlide + 1 <= this.slideCount - this.visibleSlideCount) {
+          this.handlePagination(1)
+        } else {
+          this.setCurrentSlide(0)
+        }
+      }
+    },
+    /**
      * Uses data properties on the component to store co-ordinates
      * and timestamps to detirmine the direction of the touch swipe.
      */
@@ -388,12 +517,14 @@ export default {
       carousel.addEventListener('touchstart', e => {
         this.touchEvent.swipeStartPosition = e.changedTouches['0'].pageX
         this.touchEvent.startTimeStamp = e.timeStamp
+        this.removeAutoSlideInterval()
       })
 
       carousel.addEventListener('touchend', e => {
         this.touchEvent.swipeEndPosition = e.changedTouches['0'].pageX
         this.touchEvent.endTimeStamp = e.timeStamp
         this.handleTouchEvent()
+        this.addAutoSlideInterval()
       })
 
       carousel.addEventListener(

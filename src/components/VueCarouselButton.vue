@@ -1,5 +1,5 @@
 <template>
-  <button class="v-carousel-btn" :style="$props.buttonStyle">
+  <button class="v-carousel-btn">
     <slot>
       <div v-html="$props.content" />
     </slot>
@@ -10,10 +10,6 @@
 export default {
   name: 'VueCarouselButton',
   props: {
-    buttonStyle: {
-      type: Object,
-      default: () => ({})
-    },
     content: {
       type: String,
       default: ''

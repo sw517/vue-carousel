@@ -2,10 +2,12 @@
   <div id="app">
     <VueCarousel
       :config="{
+        loop: false,
+        autoSlide: true,
         slidesVisible: {
           xs: 2,
           sm: 3.5,
-          md: 3.5
+          md: 5
         }
       }"
     >
