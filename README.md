@@ -50,11 +50,133 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
 ...
 </vue-carousel>
 ```
-
+<!--
 | Key             | Type    | Default&nbsp;Value&nbsp;&nbsp;&nbsp; | Optional&nbsp;Values&nbsp;&nbsp;&nbsp; | Description                         |
 | :-------------- | :------ | :------------ | :-------------- | :---------------------------------- |
 | `controls`      | Object  | `{`<br/>&nbsp;&nbsp;`previous: "&lt;",`<br/>&nbsp;&nbsp;`next: "&gt;"`<br>`}` | `{`<br/>&nbsp;&nbsp;`previous: [String]`<br/>&nbsp;&nbsp;`next: [String]`<br/>`}` | Change the contents of the previous/next controls for the carousel. HTML can be passed in a String. |
 | `loop`          | Boolean | `true`  | | Determines if the carousel should loop infintely. If false, carousel will only animate between first and last slide |
 | `slidePadding`  | Object  | `{`<br/>&nbsp;&nbsp;`xs: null,`<br/>&nbsp;&nbsp;`sm: null,`<br/>&nbsp;&nbsp;`md: null,`<br/>&nbsp;&nbsp;`lg: null`<br/>&nbsp;&nbsp;`xl: null`<br/>`}` | `{`<br/>&nbsp;&nbsp;`[Breakpoint]: "[Number][unit]",`<br/>&nbsp;&nbsp;`...`<br/>`}` | Change the padding between slides for specific breakpoints. Ensure a unit of measurement is included in the value.<br/>`"20px"` ✓<br/>`"20em"` ✓<br/>`"20"` X |
 | `slidesVisible` | Object  | `{`<br/>&nbsp;&nbsp;`xs: 1,`<br/>&nbsp;&nbsp;`sm: null,`<br/>&nbsp;&nbsp;`md: null,`<br/>&nbsp;&nbsp;`lg: null`<br/>&nbsp;&nbsp;`xl: null`<br/>`}` | `{`<br>&nbsp;&nbsp;`[Breakpoint]: [Number],`<br>&nbsp;&nbsp;`...`<br>`}` | Change the number of slides visible at specific breakpoints. The number can be a whole number of decimal. If a breakpoint is null, the carousel will use the value from a previous breakpoint. |
-| `staticBreakpoint` | String | `null`       | `null`<br/>`"xs"`<br/>`"sm"`<br/>`"md"`<br/>`"lg"`<br/>`"xl"`  | Determines at which breakpoint the carousel becomes static and shows all content |
+| `staticBreakpoint` | String | `null`       | `null`<br/>`"xs"`<br/>`"sm"`<br/>`"md"`<br/>`"lg"`<br/>`"xl"`  | Determines at which breakpoint the carousel becomes static and shows all content | -->
+
+### Table Key
+
+`Breakpoint`
+A String value - can be "xs", "sm", "md", "lg" or "xl".
+
+`Unit`
+Any valid CSS unit of measurement i.e "px" or "em".
+
+`Number`
+Any integer or decimal number.
+
+<style>
+  pre.cb {
+    min-width: 250px;
+    font-size: 0.8rem;
+  }
+</style>
+
+<table>
+  <thead>
+    <th>Key</th>
+    <th>Type</th>
+    <th>Default Value</th>
+    <th>Optional Values</th>
+    <th>Description</th>
+  </thead>
+  <tbody>
+    <!-- controls -->
+    <tr>
+      <td><pre>controls</pre></td>
+      <td>Object</td>
+      <td>
+<pre class="cb">
+{
+  previous: "&lt;",
+  next: "&gt;"
+}
+</pre>
+      </td>
+      <td>
+<pre class="cb">
+{
+  previous: [String],
+  next: [String]
+}
+</pre>
+      </td>
+      <td>Change the contents of the previous/next controls for the carousel. HTML can be passed in a String.</td>
+    </tr>
+    <!-- loop -->
+    <tr>
+      <td><pre>loop</pre></td>
+      <td>Boolean</td>
+      <td><pre class="cb">true</pre></td>
+      <td><pre class="cb">true | false</pre></td>
+      <td>Determines if the carousel should loop infintely. If false, carousel will only animate between first and last slide.</td>
+    </tr>
+    <!-- slidePadding -->
+    <tr>
+      <td><pre>slidePadding</pre></td>
+      <td>Object</td>
+      <td>
+<pre class="cb">
+{
+  xs: null,
+  sm: null,
+  md: null,
+  lg: null,
+  xl: null
+}
+</pre>
+      </td>
+      <td>
+<pre class="cb">
+{
+  [Breakpoint]: "[Number][Unit]"
+}
+</pre>
+      </td>
+      <td>
+        Change the padding between slides for specific breakpoints. Ensure a unit of measurement is included in the value.<br/>
+        "20px" ✓<br/>
+        "20em" ✓<br/>
+        "20" X<br/>
+        If all breakpoints are null (default), a fallback CSS padding value is used.
+      </td>
+    </tr>
+    <!-- slidesVisible -->
+    <tr>
+      <td><pre>slidesVisible</pre></td>
+      <td>Object</td>
+      <td>
+<pre class="cb">
+{
+  xs: 1,
+  sm: null,
+  md: null,
+  lg: null,
+  xl: null
+}
+</pre>
+      </td>
+      <td>
+<pre class="cb">
+{
+  [Breakpoint]: [Number]
+}
+</pre>
+      </td>
+      <td>Change the number of slides visible at specific breakpoints. The number can be a whole number of decimal. If a breakpoint is null, the carousel will use the value from a previous breakpoint.</td>
+    </tr>
+    <!-- staticBreakpoint -->
+    <tr>
+      <td><pre>staticBreakpoint</pre></td>
+      <td>String</td>
+      <td><pre class="cb">null</pre></td>
+      <td><pre class="cb">null | "xs" | "sm" | "md" | "lg" | "xl"</pre></td></pre></td>
+      <td>Change the number of slides visible at specific breakpoints. The number can be a whole number of decimal. If a breakpoint is null, the carousel will use the value from a previous breakpoint.</td>
+    </tr>
+  </tbody>
+</table>
