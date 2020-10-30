@@ -68,7 +68,13 @@ A String value - can be "xs", "sm", "md", "lg" or "xl".
 Any valid CSS unit of measurement i.e "px" or "em".
 
 `Number`
-Any integer or decimal number.
+Any positive integer or decimal number.
+
+`CSS-Property`
+Any valid CSS property
+
+`CSS-Value`
+Any valid CSS value
 
 <table>
   <thead>
@@ -79,6 +85,62 @@ Any integer or decimal number.
     <th>Description</th>
   </thead>
   <tbody>
+    <!-- autoSlide -->
+    <tr>
+      <td><pre>autoSlide</pre></td>
+      <td>Boolean</td>
+      <td><pre style="font-size: 0.8rem">true</pre></td>
+      <td><pre style="font-size: 0.8rem">true | false</pre></td>
+      </td>
+      <td>Detirmines if the carousel will slide automatically based on `autoSlideInterval`.</td>
+    </tr>
+    <!-- autoSlideHoverPause -->
+    <tr>
+      <td><pre>autoSlideHoverPause</pre></td>
+      <td>Boolean</td>
+      <td><pre style="font-size: 0.8rem">true</pre></td>
+      <td><pre style="font-size: 0.8rem">true | false</pre></td>
+      </td>
+      <td>Detirmines if the carousel should stop auto sliding when the mouse hovers the carousel.</td>
+    </tr>
+    <!-- autoSlideInterval -->
+    <tr>
+      <td><pre>autoSlideInterval</pre></td>
+      <td>Boolean</td>
+      <td><pre style="font-size: 0.8rem">3000</pre></td>
+      <td><pre style="font-size: 0.8rem">[Number]</pre></td>
+      </td>
+      <td>Changes the timing for auto slide in milliseconds.</td>
+    </tr>
+    <!-- breakpoints -->
+    <tr>
+      <td><pre>breakpoints</pre></td>
+      <td>Object</td>
+      <td>
+<pre style="font-size: 0.8rem">
+{
+  xs: 0,
+  sm: 600,
+  md: 980,
+  lg: 1200,
+  xl: 1600
+}
+</pre>
+      </td>
+      <td>
+<pre style="font-size: 0.8rem">
+{
+  xs: [Number],
+  sm: [Number],
+  md: [Number],
+  lg: [Number],
+  xl: [Number]
+}
+</pre>
+      </td>
+      </td>
+      <td>Customise the breakpoints. All breakpoints must be defined and values must be valid or default will be used.</td>
+    </tr>
     <!-- controls -->
     <tr>
       <td><pre>controls</pre></td>
@@ -87,7 +149,8 @@ Any integer or decimal number.
 <pre style="font-size: 0.8rem">
 {
   previous: "&lt;",
-  next: "&gt;"
+  next: "&gt;",
+  styles: null
 }
 </pre>
       </td>
@@ -95,7 +158,8 @@ Any integer or decimal number.
 <pre style="font-size: 0.8rem">
 {
   previous: [String],
-  next: [String]
+  next: [String],
+  styles: null || {[cssProperty]: ['css-value`]}
 }
 </pre>
       </td>
