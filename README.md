@@ -2,13 +2,13 @@
 
 ### Installation
 
-1. Install the npm package
-```
+1 . Install the npm package
+```bash
 npm install @samwood/vue-carousel
 ```
 
-2. Import VueCarousel into Vue component script
-```
+2  . Import VueCarousel into Vue component script
+```vue
 // my-component.vue
 
 <template>
@@ -27,8 +27,8 @@ export default {
 </script>
 ```
 
-3. Add VueCarousel to Vue component template
-```
+3 . Add VueCarousel to Vue component template
+```vue
 // my-component.vue
 
 <template>
@@ -53,7 +53,7 @@ export default {
 ```
 
 Optionally, you can dynamically change the v-slot to avoid repeated code.
-```
+```vue
 // my-component.vue
 
 <template>
@@ -76,7 +76,7 @@ Optionally, you can dynamically change the v-slot to avoid repeated code.
 #### Example
 Vue carousel takes a `config` prop - an object contain various keys to change the functionality and appearance of the component.
 
-```
+```vue
 <vue-carousel
   :config="{
     slidesVisible: {...},
