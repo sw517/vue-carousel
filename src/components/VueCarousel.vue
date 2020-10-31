@@ -160,6 +160,22 @@ export default {
     currentBreakpoint() {
       this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
       this.setIsStatic()
+    },
+    config: {
+      handler() {
+        this.removeAutoSlideInterval()
+        this.setUpConfig()
+        this.setSlideCount()
+        this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
+
+        if (!this.sliderConfig.loop) {
+          this.setCurrentSlide(0)
+        } else {
+          this.setCurrentSlide(Math.ceil(this.visibleSlideCount))
+        }
+        this.addAutoSlideInterval()
+      },
+      deep: true
     }
   },
   created() {
@@ -167,6 +183,7 @@ export default {
     this.setSlideCount()
   },
   mounted() {
+    this.setSlideCount()
     this.recordCurrentWindowWidth()
     this.setCurrentBreakpoint()
     this.setIsStatic()

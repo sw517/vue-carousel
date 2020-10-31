@@ -1,5 +1,76 @@
 # vue-carousel
 
+### Installation
+
+1. Install the npm package
+```
+npm install @samwood/vue-carousel
+```
+
+2. Import VueCarousel into Vue component script
+```
+// my-component.vue
+
+<template>
+  <MyComponent>...</MyComponent>
+</template>
+
+<script>
+import VueCarousel from '@samwood/vue-carousel';
+
+export default {
+  name: 'MyComponent',
+  components: {
+    VueCarousel
+  }
+}
+</script>
+```
+
+3. Add VueCarousel to Vue component template
+```
+// my-component.vue
+
+<template>
+  <MyComponent>
+    <VueCarousel>
+      <template v-slot[0]>
+        <MyChildComponent />
+      </template>
+      <template v-slot[1]>
+        <MyChildComponent />
+      </template>
+      <template v-slot[3]>
+        <MyChildComponent />
+      </template>
+    </VueCarousel>
+  </MyComponent>
+</template>
+
+<script>
+...
+</script>
+```
+
+Optionally, you can dynamically change the v-slot to avoid repeated code.
+```
+// my-component.vue
+
+<template>
+  <MyComponent>
+    <VueCarousel>
+      <template v-for="n in slides" v-slot[n-1]>
+        <MyChildComponent :key="`slide-${n-1}`" />
+      </template>
+    </VueCarousel>
+  </MyComponent>
+</template>
+
+<script>
+...
+</script>
+```
+
 ### Config
 
 #### Example
@@ -9,7 +80,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
 <vue-carousel
   :config="{
     slidesVisible: {...},
-    staticBreakpoint: 'md',
+    staticBreakpoint: "md",
     loop: true
   }"
 >
