@@ -100,7 +100,7 @@ export default {
     cSlideIndexArray() {
       const slides = []
       for (let i = 0; i < this.slideCount; i += 1) slides.push(i)
-      if (!this.sliderConfig.loop) return slides
+      if (!this.sliderConfig.loop || this.isStatic) return slides
 
       const prefixSlides = []
       const suffixSlides = []
@@ -199,7 +199,7 @@ export default {
     setUpConfig() {
       const defaultConfig = () => ({
         autoplay: false,
-        autoplayHoverPause: true,
+        autoplayHoverPause: false,
         autoplayInterval: 3000,
         breakpoints: {
           xs: 0,
@@ -213,7 +213,7 @@ export default {
           next: '&gt;',
           styles: null
         },
-        loop: true,
+        loop: false,
         slidePadding: {
           xs: null,
           sm: null,
@@ -299,11 +299,18 @@ export default {
       if (!config) return {}
 
       return Object.keys(config).reduce((acc, key) => {
-        if (typeof config[key] === 'number') {
-          acc[key] = config[key]
-        } else {
+        if (
+          typeof Number(config[key]) === 'number' &&
+          Number(config[key]) !== 0
+        ) {
+          acc[key] = Number(config[key])
+        } else if (
+          config[key] !== '' &&
+          config[key] !== null &&
+          config[key] !== undefined
+        ) {
           console.warn(
-            `Invalid slidesVisible value. \nconfig.slidesVisible.${key} must be a valid number.`
+            `Invalid slidesVisible value. \nconfig.slidesVisible.${key} must be a valid positive number.`
           )
         }
         return acc
