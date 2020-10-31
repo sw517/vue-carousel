@@ -54,9 +54,9 @@
 // Helpers
 import merge from 'lodash.merge'
 import cloneDeep from 'lodash.clonedeep'
-import isTrue from '@/scripts/helpers/isTrue'
+import isTrue from '../scripts/helpers/isTrue' //'@/scripts/helpers/isTrue'
 // Components
-import VueCarouselButton from '@/components/VueCarouselButton'
+import VueCarouselButton from './VueCarouselButton.vue'
 
 export default {
   name: 'VueCarousel',
@@ -231,17 +231,28 @@ export default {
         staticBreakpoint: null
       })
 
+      // Clone props.config to validate individual parameters.
       const clonedPropsConfig = cloneDeep(this.$props.config)
 
-      clonedPropsConfig.breakpoints = this.validateBreakpoints(
-        clonedPropsConfig.breakpoints
-      )
-        ? clonedPropsConfig.breakpoints
-        : defaultConfig().breakpoints
+      if (Object.keys(clonedPropsConfig)) {
+        // If any breakpoint is invalid, validateBreakpoints will return false.
+        clonedPropsConfig.breakpoints = this.validateBreakpoints(
+          clonedPropsConfig.breakpoints
+        )
+          ? clonedPropsConfig.breakpoints
+          : defaultConfig().breakpoints
 
-      clonedPropsConfig.slidesVisible = this.validateSlidesVisible(
-        clonedPropsConfig.slidesVisible
-      )
+        // validateSlidesVisible will remove individual breakpoints if invalid or
+        // return an empty object if all are invalid or not set.
+        const validatedSlidesVisible = this.validateSlidesVisible(
+          clonedPropsConfig.slidesVisible
+        )
+
+        clonedPropsConfig.slidesVisible = Object.keys(validatedSlidesVisible)
+          .length
+          ? validatedSlidesVisible
+          : defaultConfig().slidesVisible
+      }
 
       this.sliderConfig = Object.assign(
         {},
@@ -285,6 +296,8 @@ export default {
      * @return {object} The validated config object
      */
     validateSlidesVisible(config) {
+      if (!config) return {}
+
       return Object.keys(config).reduce((acc, key) => {
         if (typeof config[key] === 'number') {
           acc[key] = config[key]

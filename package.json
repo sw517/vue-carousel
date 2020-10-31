@@ -1,10 +1,19 @@
 {
-  "name": "vue-carousel",
+  "name": "@sw/vue-carousel",
   "version": "0.1.0",
-  "private": true,
+  "author": "Sam Wood",
+  "main": "dist/vue-carousel.umd.js",
+  "module": "dist/vue-carousel.esm.js",
+  "unpkg": "dist/vue-carousel.min.js",
+  "browser": {
+    "./sfc": "src/vue-carousel.vue"
+  },
   "scripts": {
+    "build": "npm run build:umd & npm run build:es & npm run build:unpkg",
+    "build:umd": "rollup --config build/rollup.config.js --format umd --file dist/vue-carousel.umd.js",
+    "build:es": "rollup --config build/rollup.config.js --format es --file dist/vue-carousel.esm.js",
+    "build:unpkg": "rollup --config build/rollup.config.js --format iife --file dist/vue-carousel.min.js",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
@@ -15,6 +24,10 @@
     "vue": "^2.6.11"
   },
   "devDependencies": {
+    "rollup": "^1.17.0",
+    "@rollup/plugin-buble": "^0.21.3",
+    "@rollup/plugin-commonjs": "^11.1.0",
+    "rollup-plugin-vue": "^5.0.1",
     "@vue/cli-plugin-babel": "^4.4.0",
     "@vue/cli-plugin-eslint": "^4.4.0",
     "@vue/cli-plugin-unit-jest": "^4.4.0",
