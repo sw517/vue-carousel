@@ -4,7 +4,12 @@
     @mouseleave="addAutoplayInterval"
     @mousedown="removeAutoplayInterval"
     @mouseup="addAutoplayInterval"
-    :class="[{ 'v-carousel--static': isStatic }]"
+    :class="[
+      {
+        'v-carousel--static': isStatic,
+        'v-carousel--draggable': isTrue(sliderConfig.mouseDrag)
+      }
+    ]"
     class="v-carousel"
   >
     <div
@@ -14,7 +19,7 @@
       <VueCarouselButton
         @click.native="handleControlBtnClick(-1)"
         @click="handleControlBtnClick(-1)"
-        :style="sliderConfig.controls.styles"
+        :style="sliderConfig.controls.buttonStyles"
         aria-label="Previous Slide"
         class="v-carousel__controls__btn v-carousel__controls__btn--prev"
         :class="{
@@ -28,7 +33,7 @@
       <VueCarouselButton
         @click.native="handleControlBtnClick(1)"
         @click="handleControlBtnClick(1)"
-        :style="sliderConfig.controls.styles"
+        :style="sliderConfig.controls.buttonStyles"
         aria-label="Next Slide"
         class="v-carousel__controls__btn v-carousel__controls__btn--next"
         :class="{
@@ -178,7 +183,14 @@ export default {
         } else {
           this.skipToSlide(0)
         }
-        this.addAutoplayInterval()
+
+        if (isTrue(this.sliderConfig.mouseDrag)) {
+          this.addMouseDragEventListeners()
+        }
+
+        if (isTrue(this.sliderConfig.autoplay)) {
+          this.addAutoplayInterval()
+        }
       },
       deep: true
     }
@@ -203,7 +215,14 @@ export default {
 
     this.addTouchEventListeners()
     this.addResizeListener()
-    this.addAutoplayInterval()
+
+    if (isTrue(this.sliderConfig.mouseDrag)) {
+      this.addMouseDragEventListeners()
+    }
+
+    if (isTrue(this.sliderConfig.autoplay)) {
+      this.addAutoplayInterval()
+    }
   },
   updated() {
     this.setSlideCount()
@@ -214,6 +233,7 @@ export default {
     this.removeAutoplayInterval()
   },
   methods: {
+    isTrue,
     /**
      * Merges default slider config and custom props config
      * into one configuration object used by the component.
@@ -234,9 +254,10 @@ export default {
           previous: '&lt;',
           next: '&gt;',
           showButtons: true,
-          styles: null
+          buttonStyles: null
         },
         loop: false,
+        mouseDrag: false,
         slidePadding: {
           xs: null,
           sm: null,
@@ -533,7 +554,7 @@ export default {
      * increment the current slide.
      */
     addAutoplayInterval() {
-      if (this.sliderConfig.autoplay && !this.autoplayIntervalId) {
+      if (!this.autoplayIntervalId) {
         this.autoplayIntervalId = setInterval(
           this.autoIncrement,
           this.sliderConfig.autoplayInterval
@@ -576,14 +597,22 @@ export default {
       carousel.addEventListener('touchstart', e => {
         this.touchEvent.swipeStartPosition = e.changedTouches['0'].pageX
         this.touchEvent.startTimeStamp = e.timeStamp
-        this.removeAutoplayInterval()
+
+        // Temporarily disable autoplay if user is interacting with carousel.
+        if (this.autoplayIntervalId) {
+          this.removeAutoplayInterval()
+        }
       })
 
       carousel.addEventListener('touchend', e => {
         this.touchEvent.swipeEndPosition = e.changedTouches['0'].pageX
         this.touchEvent.endTimeStamp = e.timeStamp
         this.handleTouchEvent()
-        this.addAutoplayInterval()
+
+        // Re-add autoplay when user stops interacting with carousel.
+        if (this.sliderConfig.autoplay) {
+          this.addAutoplayInterval()
+        }
       })
 
       carousel.addEventListener(
@@ -594,6 +623,50 @@ export default {
             e.changedTouches['0'].pageX - this.touchEvent.swipeStartPosition
           this.touchEvent.moveTimeStamp = e.timeStamp
           this.handleTouchEvent()
+        },
+        { passive: false }
+      )
+    },
+    /**
+     * Uses data properties on the component to store co-ordinates
+     * and timestamps to detirmine the direction of the touch swipe.
+     */
+    addMouseDragEventListeners() {
+      const carousel = this.$refs['v-carousel-wrap']
+
+      carousel.addEventListener('mousedown', e => {
+        console.log(e)
+        e.preventDefault()
+        this.touchEvent.swipeStartPosition = e.pageX
+        this.touchEvent.startTimeStamp = e.timeStamp
+
+        // Temporarily disable autoplay if user is interacting with carousel.
+        if (this.autoplayIntervalId) {
+          this.removeAutoplayInterval()
+        }
+      })
+
+      carousel.addEventListener('mouseup', e => {
+        this.touchEvent.swipeEndPosition = e.pageX
+        this.touchEvent.endTimeStamp = e.timeStamp
+        this.handleTouchEvent()
+
+        // Re-add autoplay when user stops interacting with carousel.
+        if (this.sliderConfig.autoplay) {
+          this.addAutoplayInterval()
+        }
+      })
+
+      carousel.addEventListener(
+        'mousemove',
+        e => {
+          // If mouse is pressed down
+          if (this.touchEvent.endTimeStamp < this.touchEvent.startTimeStamp) {
+            this.touchEvent.swipeMovePosition =
+              e.pageX - this.touchEvent.swipeStartPosition
+            this.touchEvent.moveTimeStamp = e.timeStamp
+            this.handleTouchEvent()
+          }
         },
         { passive: false }
       )
@@ -795,6 +868,15 @@ export default {
     .v-carousel__slide {
       width: 100%;
       min-width: 100%;
+    }
+  }
+
+  &--draggable {
+    cursor: grab;
+
+    button,
+    a {
+      cursor: pointer;
     }
   }
 }

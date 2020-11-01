@@ -105,7 +105,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
       <td>Boolean</td>
       <td><pre><code class="language-javascript">false</code></pre></td>
       </td>
-      <td>Detirmines if the carousel will slide automatically based on `autoplayInterval`.</td>
+      <td>Determines if the carousel will slide automatically based on `autoplayInterval`.</td>
     </tr>
     <!-- autoplayHoverPause -->
     <tr>
@@ -113,7 +113,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
       <td>Boolean</td>
       <td><pre><code class="language-javascript">false</code></pre></td>
       </td>
-      <td>Detirmines if the carousel should stop auto sliding when the mouse hovers the carousel.</td>
+      <td>Determines if the carousel should stop auto sliding when the mouse hovers the carousel.</td>
     </tr>
     <!-- autoplayInterval -->
     <tr>
@@ -151,7 +151,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   previous: "&amp;lt;",
   next: "&amp;gt;",
   showButtons: true,
-  styles: null
+  buttonStyles: null
 }
 </code></pre>
       </td>
@@ -162,7 +162,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
 {
   previous: "&lt;i class=\"fa fa-arrow-left\" /&gt;",
   next: "&lt;i class=\"fa fa-arrow-right\" /&gt;",
-  styles: {
+  buttonStyles: {
     background-color: '#000',
     color: 'white',
     border-radius: '10px'
@@ -290,7 +290,7 @@ Example
 ```scss
 <style lang="scss>
 .my-component {
-  & ::v-deep .vue-carousel--static {
+  & ::v-deep .v-carousel--static {
     display: grid;
   }
 }
