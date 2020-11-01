@@ -174,6 +174,7 @@ export default {
     config: {
       handler() {
         this.removeAutoplayInterval()
+        this.removeMouseDragEventListeners()
         this.setUpConfig()
         this.setSlideCount()
         this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
@@ -554,7 +555,7 @@ export default {
      * increment the current slide.
      */
     addAutoplayInterval() {
-      if (!this.autoplayIntervalId) {
+      if (!this.autoplayIntervalId && isTrue(this.sliderConfig.autoplay)) {
         this.autoplayIntervalId = setInterval(
           this.autoIncrement,
           this.sliderConfig.autoplayInterval
@@ -594,82 +595,80 @@ export default {
     addTouchEventListeners() {
       const carousel = this.$refs['v-carousel-wrap']
 
-      carousel.addEventListener('touchstart', e => {
-        this.touchEvent.swipeStartPosition = e.changedTouches['0'].pageX
-        this.touchEvent.startTimeStamp = e.timeStamp
-
-        // Temporarily disable autoplay if user is interacting with carousel.
-        if (this.autoplayIntervalId) {
-          this.removeAutoplayInterval()
-        }
+      carousel.addEventListener('touchstart', this.recordPressDownStart)
+      carousel.addEventListener('touchend', this.recordPressDownEnd)
+      carousel.addEventListener('touchmove', this.recordPressDownMove, {
+        passive: false
       })
-
-      carousel.addEventListener('touchend', e => {
-        this.touchEvent.swipeEndPosition = e.changedTouches['0'].pageX
-        this.touchEvent.endTimeStamp = e.timeStamp
-        this.handleTouchEvent()
-
-        // Re-add autoplay when user stops interacting with carousel.
-        if (this.sliderConfig.autoplay) {
-          this.addAutoplayInterval()
-        }
-      })
-
-      carousel.addEventListener(
-        'touchmove',
-        e => {
-          e.preventDefault()
-          this.touchEvent.swipeMovePosition =
-            e.changedTouches['0'].pageX - this.touchEvent.swipeStartPosition
-          this.touchEvent.moveTimeStamp = e.timeStamp
-          this.handleTouchEvent()
-        },
-        { passive: false }
-      )
     },
     /**
      * Uses data properties on the component to store co-ordinates
-     * and timestamps to detirmine the direction of the touch swipe.
+     * and timestamps to detirmine the direction of the mouse drag.
      */
     addMouseDragEventListeners() {
       const carousel = this.$refs['v-carousel-wrap']
 
-      carousel.addEventListener('mousedown', e => {
-        console.log(e)
-        e.preventDefault()
-        this.touchEvent.swipeStartPosition = e.pageX
-        this.touchEvent.startTimeStamp = e.timeStamp
+      carousel.addEventListener('mousedown', this.recordPressDownStart)
+      carousel.addEventListener('mouseup', this.recordPressDownEnd)
+      carousel.addEventListener('mousemove', this.recordPressDownMove)
+    },
+    /**
+     * Remove the mouse event listeners to ensure they are not duplicated
+     * when the config prop updates and the watcher resets the carousel.
+     */
+    removeMouseDragEventListeners() {
+      const carousel = this.$refs['v-carousel-wrap']
 
-        // Temporarily disable autoplay if user is interacting with carousel.
-        if (this.autoplayIntervalId) {
-          this.removeAutoplayInterval()
-        }
-      })
+      carousel.removeEventListener('mousedown', this.recordPressDownStart)
+      carousel.removeEventListener('mouseup', this.recordPressDownEnd)
+      carousel.addEventListener('mousemove', this.recordPressDownMove)
+    },
+    /**
+     * Record the position and timestamp of the mousedown or touchstart event.
+     * @param {event} e mousedown or touchstart event.
+     */
+    recordPressDownStart(e) {
+      // Touch event uses changedTouches, mousedown does not.
+      let pressEvent = e.changedTouches ? e.changedTouches['0'] : e
+      this.touchEvent.swipeStartPosition = pressEvent.pageX
+      this.touchEvent.startTimeStamp = e.timeStamp
 
-      carousel.addEventListener('mouseup', e => {
-        this.touchEvent.swipeEndPosition = e.pageX
-        this.touchEvent.endTimeStamp = e.timeStamp
+      // Temporarily disable autoplay when user is interacting with carousel.
+      if (this.autoplayIntervalId) {
+        this.removeAutoplayInterval()
+      }
+    },
+    /**
+     * Record the position and timestamp of the mouseup or touchend event.
+     * @param {event} e mouseup or touchend event.
+     */
+    recordPressDownEnd(e) {
+      // Touch event uses changedTouches, mouseup does not.
+      let pressEvent = e.changedTouches ? e.changedTouches['0'] : e
+      this.touchEvent.swipeEndPosition = pressEvent.pageX
+      this.touchEvent.endTimeStamp = e.timeStamp
+      this.handleTouchEvent()
+
+      // Re-add autoplay when user stops interacting with carousel.
+      if (isTrue(this.sliderConfig.autoplay)) {
+        this.addAutoplayInterval()
+      }
+    },
+    /**
+     * Record the position and timestamp of the mousemove or touchmove event.
+     * @param {event} e mousemove or touchmove event.
+     */
+    recordPressDownMove(e) {
+      // Prevent page scrolling for touch event.
+      e.preventDefault()
+      if (this.touchEvent.endTimeStamp < this.touchEvent.startTimeStamp) {
+        // Touch event uses changedTouches, mousemove does not.
+        let pressEvent = e.changedTouches ? e.changedTouches['0'] : e
+        this.touchEvent.swipeMovePosition =
+          pressEvent.pageX - this.touchEvent.swipeStartPosition
+        this.touchEvent.moveTimeStamp = e.timeStamp
         this.handleTouchEvent()
-
-        // Re-add autoplay when user stops interacting with carousel.
-        if (this.sliderConfig.autoplay) {
-          this.addAutoplayInterval()
-        }
-      })
-
-      carousel.addEventListener(
-        'mousemove',
-        e => {
-          // If mouse is pressed down
-          if (this.touchEvent.endTimeStamp < this.touchEvent.startTimeStamp) {
-            this.touchEvent.swipeMovePosition =
-              e.pageX - this.touchEvent.swipeStartPosition
-            this.touchEvent.moveTimeStamp = e.timeStamp
-            this.handleTouchEvent()
-          }
-        },
-        { passive: false }
-      )
+      }
     },
     handleControlBtnClick(increment) {
       if (isTrue(this.sliderConfig.loop)) {

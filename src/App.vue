@@ -13,10 +13,10 @@
       }"
     >
       <template v-for="n in Number(slideCount)" v-slot:[n-1]>
-        <div :key="n - 1">
+        <a href="/" :key="n - 1">
           <img src="./assets/logo.png" alt="Logo" />
           <div>{{ n }}</div>
-        </div>
+        </a>
       </template>
       <template v-slot:previous><span>Previous</span></template>
       <template v-slot:next><span>Next</span></template>
