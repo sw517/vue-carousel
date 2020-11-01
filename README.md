@@ -28,6 +28,8 @@
     ```
 
 3. Add VueCarousel to Vue component template
+
+    To populate the slides, you will need to add `<template>` for each slide with a `v-slot[0]` starting at base 0. Each `v-slot` should increment by 1 for every slide.
     ```vue
     // my-component.vue
 
