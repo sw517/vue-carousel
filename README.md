@@ -99,34 +99,34 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   <tbody>
     <!-- autoplay -->
     <tr>
-      <td><pre>autoplay</pre></td>
+      <td><pre><code class="language-javascript">autoplay</code></pre></td>
       <td>Boolean</td>
-      <td><pre style="font-size: 0.8rem; min-width: 250px">false</pre></td>
+      <td><pre><code class="language-javascript">false</code></pre></td>
       </td>
       <td>Detirmines if the carousel will slide automatically based on `autoplayInterval`.</td>
     </tr>
     <!-- autoplayHoverPause -->
     <tr>
-      <td><pre>autoplayHoverPause</pre></td>
+      <td><pre><code class="language-javascript">autoplayHoverPause</code></pre></td>
       <td>Boolean</td>
-      <td><pre style="font-size: 0.8rem; min-width: 250px">false</pre></td>
+      <td><pre><code class="language-javascript">false</code></pre></td>
       </td>
       <td>Detirmines if the carousel should stop auto sliding when the mouse hovers the carousel.</td>
     </tr>
     <!-- autoplayInterval -->
     <tr>
-      <td><pre>autoplayInterval</pre></td>
+      <td><pre><code class="language-javascript">autoplayInterval</code></pre></td>
       <td>Number</td>
-      <td><pre style="font-size: 0.8rem; min-width: 250px">3000</pre></td>
+      <td><pre><code class="language-javascript">3000</code></pre></td>
       </td>
       <td>Changes the timing for auto slide in milliseconds.</td>
     </tr>
     <!-- breakpoints -->
     <tr>
-      <td><pre>breakpoints</pre></td>
+      <td><pre><code class="language-javascript">breakpoints</code></pre></td>
       <td>Object</td>
       <td>
-<pre style="font-size: 0.8rem; min-width: 250px">
+<pre><code class="language-javascript">
 {
   xs: 0,
   sm: 600,
@@ -134,28 +134,29 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   lg: 1200,
   xl: 1600
 }
-</pre>
+</code></pre>
       </td>
       </td>
       <td>Customise the breakpoints. All breakpoints must be defined and values must be valid or default will be used.</td>
     </tr>
     <!-- controls -->
     <tr>
-      <td><pre>controls</pre></td>
+      <td><pre><code class="language-javascript">controls</code></pre></td>
       <td>Object</td>
       <td>
-<pre style="font-size: 0.8rem; min-width: 250px">
+<pre><code class="language-javascript">
 {
   previous: "&amp;lt;",
   next: "&amp;gt;",
+  showButtons: true,
   styles: null
 }
-</pre>
+</code></pre>
       </td>
       <td>
         Change the contents and styles of the previous/next controls for the carousel. HTML can be passed in a String.<br/> Styles must be passed as an object.
         Example:
-<pre style="font-size: 0.8rem; min-width: 250px">
+<pre><code class="language-javascript">
 {
   previous: "&lt;i class=\"fa fa-arrow-left\" /&gt;",
   next: "&lt;i class=\"fa fa-arrow-right\" /&gt;",
@@ -165,22 +166,22 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
     border-radius: '10px'
   }
 }
-</pre>
+</code></pre>
       </td>
     </tr>
     <!-- loop -->
     <tr>
-      <td><pre>loop</pre></td>
+      <td><pre><code class="language-javascript">loop</code></pre></td>
       <td>Boolean</td>
-      <td><pre style="font-size: 0.8rem; min-width: 250px">false</pre></td>
+      <td><pre><code class="language-javascript">false</code></pre></td>
       <td>Determines if the carousel should loop infintely. If false, carousel will only animate between first and last slide.</td>
     </tr>
     <!-- slidePadding -->
     <tr>
-      <td><pre>slidePadding</pre></td>
+      <td><pre><code class="language-javascript">slidePadding</code></pre></td>
       <td>Object</td>
       <td>
-<pre style="font-size: 0.8rem; min-width: 250px">
+<pre><code class="language-javascript">
 {
   xs: null,
   sm: null,
@@ -188,24 +189,27 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   lg: null,
   xl: null
 }
-</pre>
+</code></pre>
       </td>
       <td>
-        Change the padding between slides for specific breakpoints. Ensure a unit of measurement is included in the value.<br/>
-<pre style="font-size: 0.8rem; min-width: 250px">
-"20px" ✓
-"20em" ✓
-"20" X
-</pre>
+        Change the padding between slides for specific breakpoints. If a unit of measurement is not included in the value, it will be assumed to be a pixel value.<br/>
+        Example:
+<pre><code class="language-javascript">
+{
+  xs: 10, // renders as 20px
+  sm: "15px",
+  md: "1rem" // lg and xl will inherit md value if left null
+}
+</code></pre>
         If all breakpoints are null (default), a fallback CSS padding value is used.
       </td>
     </tr>
     <!-- slidesVisible -->
     <tr>
-      <td><pre>slidesVisible</pre></td>
+      <td><pre><code class="language-javascript">slidesVisible</code></pre></td>
       <td>Object</td>
       <td>
-<pre style="font-size: 0.8rem; min-width: 250px">
+<pre><code class="language-javascript">
 {
   xs: 1,
   sm: null,
@@ -213,19 +217,19 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   lg: null,
   xl: null
 }
-</pre>
+</code></pre>
       </td>
       <td>Change the number of slides visible at specific breakpoints. The number can be a whole number or decimal. If a breakpoint is null, the carousel will use the value from a previous breakpoint.</td>
     </tr>
     <!-- staticBreakpoint -->
     <tr>
-      <td><pre>staticBreakpoint</pre></td>
+      <td><pre><code class="language-javascript">staticBreakpoint</code></pre></td>
       <td>String</td>
-      <td><pre style="font-size: 0.8rem; min-width: 250px">null</pre></td>
+      <td><pre><code class="language-javascript">null</code></pre></td>
       <td>
         Removes the carousel functionality and animation at the specified breakpoint and shows all items on screen.</br>
         Optional Values:
-        <pre style="font-size: 0.8rem; min-width: 250px">null | "xs" | "sm" | "md" | "lg" | "xl"</pre></td></pre>
+        <pre><code class="language-javascript">null | "xs" | "sm" | "md" | "lg" | "xl"</code></pre></td></code></pre>
       </td>
     </tr>
   </tbody>

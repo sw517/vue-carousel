@@ -1,15 +1,19 @@
 <template>
   <div
-    @mouseenter="removeAutoSlideInterval"
-    @mouseleave="addAutoSlideInterval"
-    @mousedown="removeAutoSlideInterval"
-    @mouseup="addAutoSlideInterval"
+    @mouseenter="removeAutoplayInterval"
+    @mouseleave="addAutoplayInterval"
+    @mousedown="removeAutoplayInterval"
+    @mouseup="addAutoplayInterval"
     :class="[{ 'v-carousel--static': isStatic }]"
     class="v-carousel"
   >
-    <div class="v-carousel__controls" v-if="!isStatic">
+    <div
+      class="v-carousel__controls"
+      v-if="!isStatic && sliderConfig.controls.showButtons"
+    >
       <VueCarouselButton
         @click.native="handleControlBtnClick(-1)"
+        @click="handleControlBtnClick(-1)"
         :style="sliderConfig.controls.styles"
         aria-label="Previous Slide"
         class="v-carousel__controls__btn v-carousel__controls__btn--prev"
@@ -23,6 +27,7 @@
       </VueCarouselButton>
       <VueCarouselButton
         @click.native="handleControlBtnClick(1)"
+        @click="handleControlBtnClick(1)"
         :style="sliderConfig.controls.styles"
         aria-label="Next Slide"
         class="v-carousel__controls__btn v-carousel__controls__btn--next"
@@ -39,7 +44,7 @@
       <div ref="cycle" :style="cCycleStyles" class="v-carousel__cycle">
         <div
           v-for="(slot, index) in cSlideIndexArray"
-          :key="index"
+          :key="getSlideKey(index)"
           :style="cSlideStyles"
           class="v-carousel__slide"
         >
@@ -83,7 +88,7 @@ export default {
       dragPosition: null,
       isSkippingSlides: false,
       isStatic: false,
-      slideCount: Object.keys(this.$slots).length,
+      slideCount: this.setSlideCount(),
       sliderConfig: {},
       touchEvent: {
         swipeStartPosition: null,
@@ -163,17 +168,17 @@ export default {
     },
     config: {
       handler() {
-        this.removeAutoSlideInterval()
+        this.removeAutoplayInterval()
         this.setUpConfig()
         this.setSlideCount()
         this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
 
-        if (!this.sliderConfig.loop) {
-          this.setCurrentSlide(0)
+        if (this.sliderConfig.loop) {
+          this.skipToSlide(Math.ceil(this.visibleSlideCount))
         } else {
-          this.setCurrentSlide(Math.ceil(this.visibleSlideCount))
+          this.skipToSlide(0)
         }
-        this.addAutoSlideInterval()
+        this.addAutoplayInterval()
       },
       deep: true
     }
@@ -198,7 +203,7 @@ export default {
 
     this.addTouchEventListeners()
     this.addResizeListener()
-    this.addAutoSlideInterval()
+    this.addAutoplayInterval()
   },
   updated() {
     this.setSlideCount()
@@ -206,7 +211,7 @@ export default {
   },
   beforeDestroy() {
     this.removeResizeListener()
-    this.removeAutoSlideInterval()
+    this.removeAutoplayInterval()
   },
   methods: {
     /**
@@ -228,6 +233,7 @@ export default {
         controls: {
           previous: '&lt;',
           next: '&gt;',
+          showButtons: true,
           styles: null
         },
         loop: false,
@@ -338,7 +344,7 @@ export default {
      * window width and breakpoint.
      */
     addResizeListener() {
-      if (window) {
+      if (typeof window !== undefined) {
         window.addEventListener('resize', this.recordCurrentWindowWidth)
       }
     },
@@ -346,7 +352,7 @@ export default {
      * Remove resize event listener from window.
      */
     removeResizeListener() {
-      if (window) {
+      if (typeof window !== undefined) {
         window.removeEventListener('resize', this.recordCurrentWindowWidth)
       }
     },
@@ -469,11 +475,24 @@ export default {
       this.isStatic = isStatic
     },
     /**
+     * This method is used to ensure that the key for the slide is
+     * the same when changing the value of sliderConfig.loop. This is
+     * to prevent the slides flickering when re-rendering.
+     */
+    getSlideKey(index) {
+      if (isTrue(this.sliderConfig.loop)) {
+        return index - Math.ceil(this.visibleSlideCount)
+      } else {
+        return index
+      }
+    },
+    /**
      * Gets the current breakpoint and slider config to
      * detirmine the padding for each slide. This component is built
      * mobile first so if only mobile or tablet padding is set, this
      * will affect laptop and desktop too.
-     * Unit must be included i.e '10px' or '1rem'
+     * Unit should be included i.e '10px' or '1rem', otherwise the unit
+     * will be assumed as a pixel value and 'px' is affixed.
      * @param {string} arg.xs Slide padding at mobile
      * @param {string} arg.sm Slide padding at tablet
      * @param {string} arg.md Slide padding at laptop
@@ -500,13 +519,20 @@ export default {
           padding = xs
           break
       }
+
+      // Checks if value is either number with missing unit or
+      // a string equivalent of a number i.e "20"
+      if (typeof Number(padding) === 'number') {
+        padding += 'px'
+      }
+
       return padding
     },
     /**
      * If autoplay is true, set an interval to automatically
      * increment the current slide.
      */
-    addAutoSlideInterval() {
+    addAutoplayInterval() {
       if (this.sliderConfig.autoplay && !this.autoplayIntervalId) {
         this.autoplayIntervalId = setInterval(
           this.autoIncrement,
@@ -518,9 +544,10 @@ export default {
      * If autoplay is true, remove the interval which automatically
      * increments the current slide.
      */
-    removeAutoSlideInterval() {
-      if (this.sliderConfig.autoplay) {
+    removeAutoplayInterval() {
+      if (this.autoplayIntervalId) {
         clearInterval(this.autoplayIntervalId)
+        this.autoplayIntervalId = null
       }
     },
     /**
@@ -549,14 +576,14 @@ export default {
       carousel.addEventListener('touchstart', e => {
         this.touchEvent.swipeStartPosition = e.changedTouches['0'].pageX
         this.touchEvent.startTimeStamp = e.timeStamp
-        this.removeAutoSlideInterval()
+        this.removeAutoplayInterval()
       })
 
       carousel.addEventListener('touchend', e => {
         this.touchEvent.swipeEndPosition = e.changedTouches['0'].pageX
         this.touchEvent.endTimeStamp = e.timeStamp
         this.handleTouchEvent()
-        this.addAutoSlideInterval()
+        this.addAutoplayInterval()
       })
 
       carousel.addEventListener(
