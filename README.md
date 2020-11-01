@@ -2,74 +2,74 @@
 
 ### Installation
 
-1 . Install the npm package
-```bash
-npm install @samwood/vue-carousel
-```
+1. Install the npm package
+    ```bash
+    npm install @samwood/vue-carousel
+    ```
 
-2  . Import VueCarousel into Vue component script
-```vue
-// my-component.vue
+2. Import VueCarousel into Vue component script
+    ```vue
+    // my-component.vue
 
-<template>
-  <MyComponent>...</MyComponent>
-</template>
+    <template>
+      <MyComponent>...</MyComponent>
+    </template>
 
-<script>
-import VueCarousel from '@samwood/vue-carousel';
+    <script>
+    import VueCarousel from '@samwood/vue-carousel';
 
-export default {
-  name: 'MyComponent',
-  components: {
-    VueCarousel
-  }
-}
-</script>
-```
+    export default {
+      name: 'MyComponent',
+      components: {
+        VueCarousel
+      }
+    }
+    </script>
+    ```
 
-3 . Add VueCarousel to Vue component template
-```vue
-// my-component.vue
+3. Add VueCarousel to Vue component template
+    ```vue
+    // my-component.vue
 
-<template>
-  <MyComponent>
-    <VueCarousel>
-      <template v-slot[0]>
-        <MyChildComponent />
-      </template>
-      <template v-slot[1]>
-        <MyChildComponent />
-      </template>
-      <template v-slot[3]>
-        <MyChildComponent />
-      </template>
-    </VueCarousel>
-  </MyComponent>
-</template>
+    <template>
+      <MyComponent>
+        <VueCarousel>
+          <template v-slot[0]>
+            <MyChildComponent />
+          </template>
+          <template v-slot[1]>
+            <MyChildComponent />
+          </template>
+          <template v-slot[3]>
+            <MyChildComponent />
+          </template>
+        </VueCarousel>
+      </MyComponent>
+    </template>
 
-<script>
-...
-</script>
-```
+    <script>
+    ...
+    </script>
+    ```
 
-Optionally, you can dynamically change the v-slot to avoid repeated code.
-```vue
-// my-component.vue
+    Optionally, you can dynamically change the v-slot to avoid repeated code.
+    ```vue
+    // my-component.vue
 
-<template>
-  <MyComponent>
-    <VueCarousel>
-      <template v-for="n in slides" v-slot[n-1]>
-        <MyChildComponent :key="`slide-${n-1}`" />
-      </template>
-    </VueCarousel>
-  </MyComponent>
-</template>
+    <template>
+      <MyComponent>
+        <VueCarousel>
+          <template v-for="n in slides" v-slot[n-1]>
+            <MyChildComponent :key="`slide-${n-1}`" />
+          </template>
+        </VueCarousel>
+      </MyComponent>
+    </template>
 
-<script>
-...
-</script>
-```
+    <script>
+    ...
+    </script>
+    ```
 
 ### Config
 
@@ -235,10 +235,62 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   </tbody>
 </table>
 
+### Styling
+
+Although the controls have options to pass styling through a JS object, this isn't always ideal, especially when you want to use your own CSS variables and mixins. You will find below a list of CSS classes that you can target to override existing styles.
+
+#### Carousel classes
+
+```
+.v-carousel
+```
+
+If you set a breakpoint to become static, you may want to change the layout of the slides. You can do this by targetting the following class:
+
+```
+.v-carousel--static
+```
+
+
+#### Controls classes
+
+```
+.v-carousel__controls__btn
+
+.v-carousel__controls__btn--prev
+.v-carousel__controls__btn--next
+.v-carousel__controls__btn--disabled
+```
+
+
+#### Slides
+
+```
+.v-carousel__slide
+```
+
+---
+
 
 ### Troubleshooting
+
+Note: Ensure that you do not apply any attributes to slide slots within the carousel that should not be duplicated such as `id` as if you set `loop` to `true`, the content in these slides will be duplicated and will cause issues.
 
 #### The first slide is missing content
 The carousel uses base-0 incrementing numbers for slot names.
 
 `v-for="n in 10"` will produce numbers 1-10 for `n`. You will need to use `v-slot:[n-1]` to include the first slides content.
+
+#### My styling isn't being applied to the carousel elements
+If you are using scoped styles, ensure that you are using `::v-deep` before targetting the carousel class.
+
+Example
+```scss
+<style lang="scss>
+.my-component {
+  & ::v-deep .vue-carousel--static {
+    display: grid;
+  }
+}
+</style>
+```
