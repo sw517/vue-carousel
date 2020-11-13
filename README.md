@@ -178,6 +178,13 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
       <td><pre><code class="language-javascript">false</code></pre></td>
       <td>Determines if the carousel should loop infintely. If false, carousel will only animate between first and last slide.</td>
     </tr>
+    <!-- mouseDrag -->
+    <tr>
+      <td><pre><code class="language-javascript">mouseDrag</code></pre></td>
+      <td>Boolean</td>
+      <td><pre><code class="language-javascript">false</code></pre></td>
+      <td>Determines if the carousel slides can be dragged using the mouse when holding left click. Note - the slides can be dragged on touch devices still even when mouseDrag is set to false.</td>
+    </tr>
     <!-- slidePadding -->
     <tr>
       <td><pre><code class="language-javascript">slidePadding</code></pre></td>
