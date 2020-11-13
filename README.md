@@ -185,6 +185,18 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
       <td><pre><code class="language-javascript">false</code></pre></td>
       <td>Determines if the carousel slides can be dragged using the mouse when holding left click. Note - the slides can be dragged on touch devices still even when mouseDrag is set to false.</td>
     </tr>
+    <!-- showEmptySpace -->
+    <tr>
+      <td><pre><code class="language-javascript">showEmptySpace</code></pre></td>
+      <td>Boolean</td>
+      <td><pre><code class="language-javascript">false</code></pre></td>
+      <td>
+        <p>Determines if the carousel can be swiped until only the last slide is visible on the left side of the screen.</p>
+        <p>If false, the carousel will not be slideable once the last slide is visible on screen.</p>
+        <p><strong>For pagination</strong> - If true, a pagination button will be used for each slide. If false, pagination buttons will only show for the first slide rendered up to the first slide visible where the last slide is on screen (paginationCount = totalSlides - visibleSlidesOnScreen). This is to prevent sliding past the last slide.</p>
+        <p>Note - this option has no effect if loop is true.</p>
+      </td>
+    </tr>
     <!-- slidePadding -->
     <tr>
       <td><pre><code class="language-javascript">slidePadding</code></pre></td>

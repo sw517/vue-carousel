@@ -177,6 +177,7 @@ export default {
         this.removeMouseDragEventListeners()
         this.setUpConfig()
         this.setSlideCount()
+        this.setIsStatic()
         this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
 
         if (this.sliderConfig.loop) {
@@ -259,6 +260,7 @@ export default {
         },
         loop: false,
         mouseDrag: false,
+        showEmptySpace: false,
         slidePadding: {
           xs: null,
           sm: null,
@@ -763,18 +765,26 @@ export default {
      */
     handlePagination(increment) {
       if (increment < 0) {
+        // Handle move to previous slide.
         if (this.currentSlide + increment > 0) {
           this.setCurrentSlide(Math.floor(this.currentSlide + increment))
         } else {
           this.setCurrentSlide(0)
         }
       } else {
+        // Handle move to next slide.
         if (
+          (isTrue(this.sliderConfig.showEmptySpace) &&
+            this.currentSlide + increment < this.slideCount) ||
           this.currentSlide + increment <
-          this.slideCount - this.visibleSlideCount
+            this.slideCount - this.visibleSlideCount
         ) {
           this.setCurrentSlide(this.currentSlide + increment)
-        } else {
+        } else if (
+          !isTrue(this.sliderConfig.showEmptySpace) &&
+          this.currentSlide + increment >=
+            this.slideCount - this.visibleSlideCount
+        ) {
           this.setCurrentSlide(this.slideCount - this.visibleSlideCount)
         }
       }
@@ -849,8 +859,12 @@ export default {
 
       if (this.currentSlide === 0 && button === 'prev') return true
       if (
-        this.currentSlide === this.slideCount - this.visibleSlideCount &&
-        button === 'next'
+        (!isTrue(this.sliderConfig.showEmptySpace) &&
+          this.currentSlide === this.slideCount - this.visibleSlideCount &&
+          button === 'next') ||
+        (isTrue(this.sliderConfig.showEmptySpace) &&
+          this.currentSlide === this.slideCount - 1 &&
+          button === 'next')
       )
         return true
     }

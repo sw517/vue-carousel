@@ -4,6 +4,7 @@
       :config="{
         loop,
         mouseDrag: true,
+        showEmptySpace: false,
         autoplay,
         slidesVisible: {
           xs: 2,
