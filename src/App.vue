@@ -6,6 +6,9 @@
         mouseDrag: false,
         showEmptySpace: false,
         autoplay,
+        controls: {
+          showPagination
+        },
         slidesVisible: {
           xs: 2,
           sm: 3.5,
@@ -25,6 +28,7 @@
     <input type="checkbox" v-model="loop" />
     <input type="checkbox" v-model="autoplay" />
     <input type="Number" v-model="slideCount" />
+    <input type="checkbox" v-model="showPagination" />
   </div>
 </template>
 
@@ -40,7 +44,8 @@ export default {
     return {
       loop: false,
       autoplay: false,
-      slideCount: 10
+      slideCount: 10,
+      showPagination: false
     }
   }
 }

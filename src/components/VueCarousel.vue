@@ -14,7 +14,7 @@
   >
     <div
       class="v-carousel__controls"
-      v-if="!isStatic && sliderConfig.controls.showButtons"
+      v-if="!isStatic && isTrue(sliderConfig.controls.showButtons)"
     >
       <VueCarouselButton
         @click.native="handleControlBtnClick(-1)"
@@ -62,7 +62,7 @@
       :count="cPaginationCount"
       :current="cPaginationCurrent"
       :button-styles="sliderConfig.controls.paginationStyles"
-      :numbered="$props.sliderConfig.controls.paginationNumbered"
+      :numbered="sliderConfig.controls.paginationNumbered"
       @pagination-click="onPaginationButtonClick"
     />
   </div>
@@ -72,7 +72,7 @@
 // Helpers
 import merge from 'lodash.merge'
 import cloneDeep from 'lodash.clonedeep'
-import isTrue from '../scripts/helpers/isTrue' //'@/scripts/helpers/isTrue'
+import isTrue from '../scripts/helpers/isTrue'
 // Components
 import VueCarouselButton from './VueCarouselButton.vue'
 import VueCarouselPagination from './VueCarouselPagination.vue'
