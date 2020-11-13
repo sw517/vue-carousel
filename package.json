@@ -1,6 +1,6 @@
 {
   "name": "@samwood/vue-carousel",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Sam Wood",
   "main": "dist/vue-carousel.umd.js",
   "module": "dist/vue-carousel.esm.js",
