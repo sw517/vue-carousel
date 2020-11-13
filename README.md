@@ -150,13 +150,16 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
 {
   previous: "&amp;lt;",
   next: "&amp;gt;",
+  buttonStyles: null,
   showButtons: true,
-  buttonStyles: null
+  showPagination: false,
+  paginationNumbered: false,
+  paginationStyles: null
 }
 </code></pre>
       </td>
       <td>
-        Change the contents and styles of the previous/next controls for the carousel. HTML can be passed in a String.<br/> Styles must be passed as an object.
+        Change the contents and styles of the previous/next controls and pagination for the carousel. HTML can be passed in a String to `previous` and `next`.<br/> Styles must be passed as an object.
         Example:
 <pre><code class="language-javascript">
 {
@@ -281,6 +284,13 @@ If you set a breakpoint to become static, you may want to change the layout of t
 .v-carousel__controls__btn--prev
 .v-carousel__controls__btn--next
 .v-carousel__controls__btn--disabled
+
+.v-carousel-pagination
+.v-carousel-pagination__list // ul/ol element containing li elements
+.v-carousel-pagination__li // li element wrapping the button
+.v-carousel-pagination__btn
+.v-carousel-pagination__btn--active
+.v-carousel-pagination__btn--number
 ```
 
 

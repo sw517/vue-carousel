@@ -3,7 +3,7 @@
     <VueCarousel
       :config="{
         loop,
-        mouseDrag: true,
+        mouseDrag: false,
         showEmptySpace: false,
         autoplay,
         slidesVisible: {

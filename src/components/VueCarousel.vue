@@ -57,6 +57,14 @@
         </div>
       </div>
     </div>
+    <VueCarouselPagination
+      v-if="this.slideCount > 0 && isTrue(sliderConfig.controls.showPagination)"
+      :count="cPaginationCount"
+      :current="cPaginationCurrent"
+      :button-styles="sliderConfig.controls.paginationStyles"
+      :numbered="$props.sliderConfig.controls.paginationNumbered"
+      @pagination-click="onPaginationButtonClick"
+    />
   </div>
 </template>
 
@@ -67,11 +75,13 @@ import cloneDeep from 'lodash.clonedeep'
 import isTrue from '../scripts/helpers/isTrue' //'@/scripts/helpers/isTrue'
 // Components
 import VueCarouselButton from './VueCarouselButton.vue'
+import VueCarouselPagination from './VueCarouselPagination.vue'
 
 export default {
   name: 'VueCarousel',
   components: {
-    VueCarouselButton
+    VueCarouselButton,
+    VueCarouselPagination
   },
   props: {
     config: {
@@ -159,6 +169,19 @@ export default {
       return {
         transform: `translateX(-${transform}px)`,
         transition: this.disableTransition || this.dragPosition ? 'none' : null
+      }
+    },
+    cPaginationCount() {
+      return isTrue(this.sliderConfig.showEmptySpace) ||
+        isTrue(this.sliderConfig.loop)
+        ? this.slideCount
+        : this.slideCount - Math.floor(this.visibleSlideCount) + 1
+    },
+    cPaginationCurrent() {
+      if (isTrue(this.sliderConfig.loop)) {
+        return this.currentSlide - Math.ceil(this.visibleSlideCount) + 1
+      } else {
+        return this.currentSlide + 1
       }
     }
   },
@@ -255,8 +278,11 @@ export default {
         controls: {
           previous: '&lt;',
           next: '&gt;',
+          buttonStyles: null,
+          paginationNumbered: false,
+          paginationStyles: null,
           showButtons: true,
-          buttonStyles: null
+          showPagination: false
         },
         loop: false,
         mouseDrag: false,
@@ -583,7 +609,10 @@ export default {
       if (this.sliderConfig.loop) {
         this.handlePaginationWithLoop(1)
       } else {
-        if (this.currentSlide + 1 <= this.slideCount - this.visibleSlideCount) {
+        if (
+          this.currentSlide + 1 <=
+          this.slideCount - Math.floor(this.visibleSlideCount)
+        ) {
           this.handlePagination(1)
         } else {
           this.setCurrentSlide(0)
@@ -783,9 +812,11 @@ export default {
         } else if (
           !isTrue(this.sliderConfig.showEmptySpace) &&
           this.currentSlide + increment >=
-            this.slideCount - this.visibleSlideCount
+            this.slideCount - Math.floor(this.visibleSlideCount)
         ) {
-          this.setCurrentSlide(this.slideCount - this.visibleSlideCount)
+          this.setCurrentSlide(
+            this.slideCount - Math.floor(this.visibleSlideCount)
+          )
         }
       }
     },
@@ -854,6 +885,10 @@ export default {
     enableAnimation() {
       this.disableTransition = false
     },
+    /**
+     * Check if carousel button should be disabled.
+     * @param {string} button 'prev' or 'next'
+     */
     isButtonDisabled(button) {
       if (isTrue(this.sliderConfig.loop)) return false
 
@@ -867,12 +902,25 @@ export default {
           button === 'next')
       )
         return true
+    },
+    /**
+     * On pagination button click, set the current slide.
+     * The page value is decremented to make it base-0 as the
+     * pagination is base-1 but the carousel is base-0.
+     * @param {number} page The page number in base-1.
+     */
+    onPaginationButtonClick(page) {
+      if (isTrue(this.sliderConfig.loop)) {
+        this.setCurrentSlide(page - 1 + Math.ceil(this.visibleSlideCount))
+      } else {
+        this.setCurrentSlide(page - 1)
+      }
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .v-carousel {
   position: relative;
 

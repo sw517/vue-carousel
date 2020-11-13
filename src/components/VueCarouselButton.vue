@@ -18,7 +18,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .v-carousel-btn {
   appearance: none;
   -webkit-appearance: none;

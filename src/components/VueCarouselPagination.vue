@@ -1,11 +1,121 @@
 <template>
-  <div class="v-carousel-pagination"></div>
+  <nav role="navigation" class="v-carousel-pagination">
+    <component :is="listType" class="v-carousel-pagination__list">
+      <li
+        v-for="(page, index) in Number($props.count)"
+        :key="index"
+        class="v-carousel-pagination__li"
+      >
+        <button
+          @click="handlePaginationClick(index + 1)"
+          @keydown.space.prevent="handlePaginationClick(index + 1)"
+          @keydown.enter="handlePaginationClick(index + 1)"
+          :style="$props.buttonStyles"
+          :aria-label="`Goto Page ${index + 1}`"
+          :aria-current="Number($props.current) === index + 1"
+          :title="`Goto Page ${index + 1}`"
+          :class="{
+            'v-carousel-pagination__btn--active':
+              Number($props.current) === index + 1,
+            'v-carousel-pagination__btn--number': $props.numbered
+          }"
+          class="v-carousel-pagination__btn"
+        >
+          <span
+            v-if="$props.numbered"
+            class="v-carousel-pagination__btn__text"
+            >{{ index + 1 }}</span
+          >
+        </button>
+      </li>
+    </component>
+  </nav>
 </template>
 
 <script>
 export default {
-  name: '',
-};
+  name: 'VueCarouselPagination',
+  props: {
+    count: {
+      type: [String, Number],
+      default: 0
+    },
+    current: {
+      type: [String, Number],
+      default: 0
+    },
+    buttonStyles: {
+      type: Object,
+      default() {
+        return {}
+      }
+    },
+    numbered: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    listType() {
+      return this.$props.numbered ? 'ol' : 'ul'
+    }
+  },
+  methods: {
+    handlePaginationClick(page) {
+      this.$emit('pagination-click', page)
+    }
+  }
+}
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+.v-carousel-pagination {
+  margin-top: 15px;
+
+  &__list {
+    list-style: none;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__li {
+    margin-bottom: 10px;
+  }
+
+  &__btn {
+    display: block;
+    appearance: none;
+    min-width: 12px;
+    max-width: 12px;
+    height: 12px;
+    background-color: #fff;
+    border: 2px solid #35495e;
+    border-radius: 999px;
+    padding: 0;
+    margin-left: 5px;
+    margin-right: 5px;
+    cursor: pointer;
+
+    &--number {
+      max-width: none;
+      height: auto;
+      padding: 3px 6px;
+      font-size: 12px;
+      border-radius: 6px;
+
+      &.v-carousel-pagination__btn--active {
+        color: #fff;
+      }
+    }
+
+    &--active {
+      background-color: #49b883;
+    }
+  }
+}
+</style>
