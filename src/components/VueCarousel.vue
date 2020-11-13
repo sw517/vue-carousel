@@ -607,13 +607,13 @@ export default {
      */
     autoIncrement() {
       if (this.sliderConfig.loop) {
-        this.handlePaginationWithLoop(1)
+        this.handleIncrementWithLoop(1)
       } else {
         if (
           this.currentSlide + 1 <=
           this.slideCount - Math.floor(this.visibleSlideCount)
         ) {
-          this.handlePagination(1)
+          this.handleIncrement(1)
         } else {
           this.setCurrentSlide(0)
         }
@@ -703,9 +703,9 @@ export default {
     },
     handleControlBtnClick(increment) {
       if (isTrue(this.sliderConfig.loop)) {
-        this.handlePaginationWithLoop(increment)
+        this.handleIncrementWithLoop(increment)
       } else {
-        this.handlePagination(increment)
+        this.handleIncrement(increment)
       }
     },
     /**
@@ -757,9 +757,9 @@ export default {
         const increment = this.calculateTouchSlideIncrement(this.touchEvent)
 
         if (isTrue(this.sliderConfig.loop)) {
-          this.handlePaginationWithLoop(increment)
+          this.handleIncrementWithLoop(increment)
         } else {
-          this.handlePagination(increment)
+          this.handleIncrement(increment)
         }
       }
     },
@@ -792,7 +792,7 @@ export default {
      * @param {number} increment Number of slides the pagination should
      * increment by.
      */
-    handlePagination(increment) {
+    handleIncrement(increment) {
       if (increment < 0) {
         // Handle move to previous slide.
         if (this.currentSlide + increment > 0) {
@@ -828,7 +828,7 @@ export default {
      * or end.
      * @param {number} increment Number of slides the carousel should increment by.
      */
-    handlePaginationWithLoop(increment) {
+    handleIncrementWithLoop(increment) {
       if (this.isSkippingSlides) return
 
       if (increment < 0) {
