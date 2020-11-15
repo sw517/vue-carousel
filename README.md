@@ -101,7 +101,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   <tbody>
     <!-- autoplay -->
     <tr>
-      <td><pre><code class="language-javascript">autoplay</code></pre></td>
+      <td>autoplay</td>
       <td>Boolean</td>
       <td><pre><code class="language-javascript">false</code></pre></td>
       </td>
@@ -109,7 +109,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
     </tr>
     <!-- autoplayHoverPause -->
     <tr>
-      <td><pre><code class="language-javascript">autoplayHoverPause</code></pre></td>
+      <td>autoplayHoverPause</td>
       <td>Boolean</td>
       <td><pre><code class="language-javascript">false</code></pre></td>
       </td>
@@ -117,7 +117,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
     </tr>
     <!-- autoplayInterval -->
     <tr>
-      <td><pre><code class="language-javascript">autoplayInterval</code></pre></td>
+      <td>autoplayInterval</td>
       <td>Number</td>
       <td><pre><code class="language-javascript">3000</code></pre></td>
       </td>
@@ -125,7 +125,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
     </tr>
     <!-- breakpoints -->
     <tr>
-      <td><pre><code class="language-javascript">breakpoints</code></pre></td>
+      <td>breakpoints</td>
       <td>Object</td>
       <td>
 <pre><code class="language-javascript">
@@ -143,7 +143,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
     </tr>
     <!-- controls -->
     <tr>
-      <td><pre><code class="language-javascript">controls</code></pre></td>
+      <td>controls</td>
       <td>Object</td>
       <td>
 <pre><code class="language-javascript">
@@ -176,33 +176,33 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
     </tr>
     <!-- loop -->
     <tr>
-      <td><pre><code class="language-javascript">loop</code></pre></td>
+      <td>loop</td>
       <td>Boolean</td>
       <td><pre><code class="language-javascript">false</code></pre></td>
       <td>Determines if the carousel should loop infintely. If false, carousel will only animate between first and last slide.</td>
     </tr>
     <!-- mouseDrag -->
     <tr>
-      <td><pre><code class="language-javascript">mouseDrag</code></pre></td>
+      <td>mouseDrag</td>
       <td>Boolean</td>
       <td><pre><code class="language-javascript">false</code></pre></td>
-      <td>Determines if the carousel slides can be dragged using the mouse when holding left click. Note - the slides can be dragged on touch devices still even when mouseDrag is set to false.</td>
+      <td>Determines if the carousel slides can be dragged using the mouse when holding left click. Note - the slides can be dragged on touch devices still even when mouseDrag is set to false.</br>This option works better when slides are not populated with links.</td>
     </tr>
     <!-- showEmptySpace -->
     <tr>
-      <td><pre><code class="language-javascript">showEmptySpace</code></pre></td>
+      <td>showEmptySpace</td>
       <td>Boolean</td>
       <td><pre><code class="language-javascript">false</code></pre></td>
       <td>
         <p>Determines if the carousel can be swiped until only the last slide is visible on the left side of the screen.</p>
         <p>If false, the carousel will not be slideable once the last slide is visible on screen.</p>
-        <p><strong>For pagination</strong> - If true, a pagination button will be used for each slide. If false, pagination buttons will only show for the first slide rendered up to the first slide visible where the last slide is on screen (paginationCount = totalSlides - visibleSlidesOnScreen). This is to prevent sliding past the last slide.</p>
+        <p><strong>For pagination</strong> - If true, a pagination button will be used for each slide. If false, pagination buttons will only show for the first slide rendered up to the first slide visible where the last slide is on screen (paginationCount = totalSlides - visibleSlidesOnScreen + 1). This is to prevent sliding past the last slide.</p>
         <p>Note - this option has no effect if loop is true.</p>
       </td>
     </tr>
     <!-- slidePadding -->
     <tr>
-      <td><pre><code class="language-javascript">slidePadding</code></pre></td>
+      <td>slidePadding</td>
       <td>Object</td>
       <td>
 <pre><code class="language-javascript">
@@ -230,7 +230,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
     </tr>
     <!-- slidesVisible -->
     <tr>
-      <td><pre><code class="language-javascript">slidesVisible</code></pre></td>
+      <td>slidesVisible</td>
       <td>Object</td>
       <td>
 <pre><code class="language-javascript">
@@ -247,13 +247,24 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
     </tr>
     <!-- staticBreakpoint -->
     <tr>
-      <td><pre><code class="language-javascript">staticBreakpoint</code></pre></td>
+      <td>staticBreakpoint</td>
       <td>String</td>
       <td><pre><code class="language-javascript">null</code></pre></td>
       <td>
         Removes the carousel functionality and animation at the specified breakpoint and shows all items on screen.</br>
         Optional Values:
         <pre><code class="language-javascript">null | "xs" | "sm" | "md" | "lg" | "xl"</code></pre></td></code></pre>
+      </td>
+    </tr>
+    <!-- touchDrag -->
+    <tr>
+      <td>touchDrag</td>
+      <td>Boolean</td>
+      <td><pre><code class="language-javascript">true</code></pre></td>
+      <td>
+        <p>Determines if the user can drag carousele slides with touch input such as on mobile and tablets or with touch screen monitors.
+        </p>
+        <p>This is set to true by default as touch drag is better UX on touch devices compared to button presses.</p>
       </td>
     </tr>
   </tbody>

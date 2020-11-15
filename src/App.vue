@@ -6,6 +6,7 @@
         mouseDrag: false,
         showEmptySpace: false,
         autoplay,
+        touchDrag,
         controls: {
           showPagination
         },
@@ -25,10 +26,16 @@
       <template v-slot:previous><span>Previous</span></template>
       <template v-slot:next><span>Next</span></template>
     </VueCarousel>
+    <div>Loop</div>
     <input type="checkbox" v-model="loop" />
+    <div>Autoplay</div>
     <input type="checkbox" v-model="autoplay" />
+    <div>Slidecount</div>
     <input type="Number" v-model="slideCount" />
+    <div>Show Pagination</div>
     <input type="checkbox" v-model="showPagination" />
+    <div>TouchDrag</div>
+    <input type="checkbox" v-model="touchDrag" />
   </div>
 </template>
 
@@ -45,7 +52,8 @@ export default {
       loop: false,
       autoplay: false,
       slideCount: 10,
-      showPagination: false
+      showPagination: false,
+      touchDrag: true
     }
   }
 }

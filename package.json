@@ -1,10 +1,14 @@
 {
   "name": "@samwood/vue-carousel",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": "Sam Wood",
   "main": "dist/vue-carousel.umd.js",
   "module": "dist/vue-carousel.esm.js",
   "unpkg": "dist/vue-carousel.min.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sw517/vue-carousel.git"
+  },
   "browser": {
     "./sfc": "src/vue-carousel.vue"
   },

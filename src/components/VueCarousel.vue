@@ -1,9 +1,9 @@
 <template>
   <div
-    @mouseenter="removeAutoplayInterval"
-    @mouseleave="addAutoplayInterval"
-    @mousedown="removeAutoplayInterval"
-    @mouseup="addAutoplayInterval"
+    @mouseenter="onMouseOver"
+    @mouseleave="onMouseOut"
+    @mousedown="onMouseOver"
+    @mouseup="onMouseOut"
     :class="[
       {
         'v-carousel--static': isStatic,
@@ -197,6 +197,7 @@ export default {
     config: {
       handler() {
         this.removeAutoplayInterval()
+        this.removeTouchDragEventListeners()
         this.removeMouseDragEventListeners()
         this.setUpConfig()
         this.setSlideCount()
@@ -207,6 +208,10 @@ export default {
           this.skipToSlide(Math.ceil(this.visibleSlideCount))
         } else {
           this.skipToSlide(0)
+        }
+
+        if (isTrue(this.sliderConfig.touchDrag)) {
+          this.addTouchDragEventListeners()
         }
 
         if (isTrue(this.sliderConfig.mouseDrag)) {
@@ -238,8 +243,11 @@ export default {
       this.setCurrentSlide(0)
     }
 
-    this.addTouchEventListeners()
     this.addResizeListener()
+
+    if (isTrue(this.sliderConfig.touchDrag)) {
+      this.addTouchDragListeners()
+    }
 
     if (isTrue(this.sliderConfig.mouseDrag)) {
       this.addMouseDragEventListeners()
@@ -301,7 +309,8 @@ export default {
           lg: null,
           xl: null
         },
-        staticBreakpoint: null
+        staticBreakpoint: null,
+        touchDrag: true
       })
 
       // Clone props.config to validate individual parameters.
@@ -623,7 +632,7 @@ export default {
      * Uses data properties on the component to store co-ordinates
      * and timestamps to detirmine the direction of the touch swipe.
      */
-    addTouchEventListeners() {
+    addTouchDragListeners() {
       const carousel = this.$refs['v-carousel-wrap']
 
       carousel.addEventListener('touchstart', this.recordPressDownStart)
@@ -653,6 +662,19 @@ export default {
       carousel.removeEventListener('mousedown', this.recordPressDownStart)
       carousel.removeEventListener('mouseup', this.recordPressDownEnd)
       carousel.addEventListener('mousemove', this.recordPressDownMove)
+    },
+    /**
+     * Remove the touch event listeners to ensure they are not duplicated
+     * when the config prop updates and the watcher resets the carousel.
+     */
+    removeTouchDragEventListeners() {
+      const carousel = this.$refs['v-carousel-wrap']
+
+      carousel.removeEventListener('touchstart', this.recordPressDownStart)
+      carousel.removeEventListener('touchend', this.recordPressDownEnd)
+      carousel.removeEventListener('touchmove', this.recordPressDownMove, {
+        passive: false
+      })
     },
     /**
      * Record the position and timestamp of the mousedown or touchstart event.
@@ -914,6 +936,16 @@ export default {
         this.setCurrentSlide(page - 1 + Math.ceil(this.visibleSlideCount))
       } else {
         this.setCurrentSlide(page - 1)
+      }
+    },
+    onMouseOver() {
+      if (isTrue(this.sliderConfig.autoplayHoverPause)) {
+        this.removeAutoplayInterval()
+      }
+    },
+    onMouseOut() {
+      if (isTrue(this.sliderConfig.autoplayHoverPause)) {
+        this.addAutoplayInterval()
       }
     }
   }
