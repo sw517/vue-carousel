@@ -103,6 +103,7 @@ export default {
       dragPosition: null,
       isSkippingSlides: false,
       isStatic: false,
+      observer: null,
       slideCount: this.setSlideCount(),
       sliderConfig: {},
       touchEvent: {
@@ -197,8 +198,9 @@ export default {
     config: {
       handler() {
         this.removeAutoplayInterval()
-        this.removeTouchDragEventListeners()
-        this.removeMouseDragEventListeners()
+        this.removeTouchDragListeners()
+        this.removeMouseDragListeners()
+        this.removeIntersectionObserver()
         this.setUpConfig()
         this.setSlideCount()
         this.setIsStatic()
@@ -211,15 +213,16 @@ export default {
         }
 
         if (isTrue(this.sliderConfig.touchDrag)) {
-          this.addTouchDragEventListeners()
+          this.addTouchDragListeners()
         }
 
         if (isTrue(this.sliderConfig.mouseDrag)) {
-          this.addMouseDragEventListeners()
+          this.addMouseDragListeners()
         }
 
         if (isTrue(this.sliderConfig.autoplay)) {
-          this.addAutoplayInterval()
+          this.setAutoplayInterval()
+          this.setIntersectionObserver()
         }
       },
       deep: true
@@ -250,11 +253,12 @@ export default {
     }
 
     if (isTrue(this.sliderConfig.mouseDrag)) {
-      this.addMouseDragEventListeners()
+      this.addMouseDragListeners()
     }
 
     if (isTrue(this.sliderConfig.autoplay)) {
-      this.addAutoplayInterval()
+      this.setAutoplayInterval()
+      this.setIntersectionObserver()
     }
   },
   updated() {
@@ -263,6 +267,8 @@ export default {
   },
   beforeDestroy() {
     this.removeResizeListener()
+    this.removeTouchDragListeners()
+    this.removeMouseDragListeners()
     this.removeAutoplayInterval()
   },
   methods: {
@@ -591,7 +597,7 @@ export default {
      * If autoplay is true, set an interval to automatically
      * increment the current slide.
      */
-    addAutoplayInterval() {
+    setAutoplayInterval() {
       if (!this.autoplayIntervalId && isTrue(this.sliderConfig.autoplay)) {
         this.autoplayIntervalId = setInterval(
           this.autoIncrement,
@@ -608,6 +614,39 @@ export default {
         clearInterval(this.autoplayIntervalId)
         this.autoplayIntervalId = null
       }
+    },
+    /**
+     * Set the intersection observer for the carousel to trigger
+     * when visible on screen.
+     */
+    setIntersectionObserver() {
+      let options = {
+        rootMargin: '-20px'
+      }
+      this.observer = new IntersectionObserver(this.handleIntersect, options)
+      this.observer.observe(this.$el)
+    },
+    /**
+     * Remove the intersection observer from the carousel.
+     */
+    removeIntersectionObserver() {
+      if (this.observer) {
+        this.observer.unobserve(this.$el)
+      }
+    },
+    /**
+     * When carousel is visible, add the autoplay interval.
+     * If the carousel is not on screen, remove autoplay interval
+     * to reduce the load on the browser.
+     */
+    handleIntersect(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          this.setAutoplayInterval()
+        } else {
+          this.removeAutoplayInterval()
+        }
+      })
     },
     /**
      * Increment the current slide by 1. If loop is disabled, reset
@@ -645,7 +684,7 @@ export default {
      * Uses data properties on the component to store co-ordinates
      * and timestamps to detirmine the direction of the mouse drag.
      */
-    addMouseDragEventListeners() {
+    addMouseDragListeners() {
       const carousel = this.$refs['v-carousel-wrap']
 
       carousel.addEventListener('mousedown', this.recordPressDownStart)
@@ -656,7 +695,7 @@ export default {
      * Remove the mouse event listeners to ensure they are not duplicated
      * when the config prop updates and the watcher resets the carousel.
      */
-    removeMouseDragEventListeners() {
+    removeMouseDragListeners() {
       const carousel = this.$refs['v-carousel-wrap']
 
       carousel.removeEventListener('mousedown', this.recordPressDownStart)
@@ -667,7 +706,7 @@ export default {
      * Remove the touch event listeners to ensure they are not duplicated
      * when the config prop updates and the watcher resets the carousel.
      */
-    removeTouchDragEventListeners() {
+    removeTouchDragListeners() {
       const carousel = this.$refs['v-carousel-wrap']
 
       carousel.removeEventListener('touchstart', this.recordPressDownStart)
@@ -704,7 +743,7 @@ export default {
 
       // Re-add autoplay when user stops interacting with carousel.
       if (isTrue(this.sliderConfig.autoplay)) {
-        this.addAutoplayInterval()
+        this.setAutoplayInterval()
       }
     },
     /**
@@ -945,7 +984,7 @@ export default {
     },
     onMouseOut() {
       if (isTrue(this.sliderConfig.autoplayHoverPause)) {
-        this.addAutoplayInterval()
+        this.setAutoplayInterval()
       }
     }
   }
