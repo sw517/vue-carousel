@@ -10,6 +10,9 @@
         controls: {
           showPagination
         },
+        transitionDuration,
+        transitionTimingFunction: 'linear',
+        autoplayInterval,
         slidesVisible: {
           xs: 2,
           sm: 3.5,
@@ -53,7 +56,9 @@ export default {
       autoplay: false,
       slideCount: 10,
       showPagination: false,
-      touchDrag: true
+      touchDrag: true,
+      autoplayInterval: 3000,
+      transitionDuration: 4000
     }
   }
 }

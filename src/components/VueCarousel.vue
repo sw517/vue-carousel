@@ -157,7 +157,8 @@ export default {
     cCycleStyles() {
       if (this.isStatic) return null
 
-      let transform
+      let transform, transition
+      const { transitionDuration, transitionTimingFunction } = this.sliderConfig
 
       if (this.dragPosition) {
         transform =
@@ -166,10 +167,13 @@ export default {
       } else {
         transform =
           (this.currentSlide * this.carouselWidth) / this.visibleSlideCount
+        transition = `transform ${transitionDuration}ms ${transitionTimingFunction}`
       }
+
       return {
         transform: `translateX(-${transform}px)`,
-        transition: this.disableTransition || this.dragPosition ? 'none' : null
+        transition:
+          this.disableTransition || this.dragPosition ? 'none' : transition
       }
     },
     cPaginationCount() {
@@ -276,6 +280,11 @@ export default {
     /**
      * Merges default slider config and custom props config
      * into one configuration object used by the component.
+     *
+     * Validated properties:
+     * arg.breakpoints - will use default if invalid
+     * arg.slidesVisible - will remove invalid keys from object
+     * arg.autoplayInterval - will remove autoplay if invalid
      */
     setUpConfig() {
       const defaultConfig = () => ({
@@ -316,22 +325,33 @@ export default {
           xl: null
         },
         staticBreakpoint: null,
-        touchDrag: true
+        touchDrag: true,
+        transitionDuration: 500,
+        transitionTimingFunction: 'ease'
       })
 
-      // Clone props.config to validate individual parameters.
+      // Clone props.config to validate individual properties.
       const clonedPropsConfig = cloneDeep(this.$props.config)
 
       if (Object.keys(clonedPropsConfig)) {
-        // If any breakpoint is invalid, validateBreakpoints will return false.
+        /**
+         * Breakpoint Validation
+         *
+         * If any breakpoint is invalid, validateBreakpoints will return false
+         * and default will be used.
+         */
         clonedPropsConfig.breakpoints = this.validateBreakpoints(
           clonedPropsConfig.breakpoints
         )
           ? clonedPropsConfig.breakpoints
           : defaultConfig().breakpoints
 
-        // validateSlidesVisible will remove individual breakpoints if invalid or
-        // return an empty object if all are invalid or not set.
+        /**
+         * Slides Visible Validation
+         *
+         * validateSlidesVisible will remove individual breakpoints if invalid or
+         * return an empty object if all are invalid or not set.
+         */
         const validatedSlidesVisible = this.validateSlidesVisible(
           clonedPropsConfig.slidesVisible
         )
@@ -340,6 +360,28 @@ export default {
           .length
           ? validatedSlidesVisible
           : defaultConfig().slidesVisible
+
+        /**
+         * Autoplay Interval Validation
+         *
+         * Autoplay will not be enabled if the autoplayInterval is less than
+         * the transitionDuration value.
+         */
+        if (isTrue(clonedPropsConfig.autoplay)) {
+          const transitionDuration =
+            clonedPropsConfig.transitionDuration ||
+            this.defaultConfig().transitionDuration
+          const autoplayInterval =
+            clonedPropsConfig.autoplayInterval ||
+            this.defaultConfig().autoplayInterval
+
+          if (transitionDuration > autoplayInterval) {
+            clonedPropsConfig.autoplay = false
+            console.warn(
+              `transitionDuration [${transitionDuration}] must be less than or equal to autoplayInterval [${autoplayInterval}] if autoplay is enabled.\nDisabling autoplay.`
+            )
+          }
+        }
       }
 
       this.sliderConfig = Object.assign(
