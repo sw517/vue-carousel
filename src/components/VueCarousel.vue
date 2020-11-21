@@ -370,10 +370,10 @@ export default {
         if (isTrue(clonedPropsConfig.autoplay)) {
           const transitionDuration =
             clonedPropsConfig.transitionDuration ||
-            this.defaultConfig().transitionDuration
+            defaultConfig().transitionDuration
           const autoplayInterval =
             clonedPropsConfig.autoplayInterval ||
-            this.defaultConfig().autoplayInterval
+            defaultConfig().autoplayInterval
 
           if (transitionDuration > autoplayInterval) {
             clonedPropsConfig.autoplay = false
