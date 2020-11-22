@@ -174,6 +174,13 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
 </code></pre>
       </td>
     </tr>
+    <!-- debug -->
+    <tr>
+      <td>debug</td>
+      <td>Boolean</td>
+      <td><pre><code class="language-javascript">false</code></pre></td>
+      <td>Allows warnings and caught-errors in console if enabled.</td>
+    </tr>
     <!-- loop -->
     <tr>
       <td>loop</td>

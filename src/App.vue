@@ -2,6 +2,7 @@
   <div id="app">
     <VueCarousel
       :config="{
+        debug,
         loop,
         mouseDrag: false,
         showEmptySpace: false,
@@ -54,6 +55,7 @@ export default {
     return {
       loop: false,
       autoplay: false,
+      debug: true,
       slideCount: 10,
       showPagination: false,
       touchDrag: true,
