@@ -33,6 +33,7 @@ vue.config.js
 
 # Development/testing files
 build
+coverage
 public
 tests
 src/assets
