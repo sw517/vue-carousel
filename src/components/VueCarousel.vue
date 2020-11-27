@@ -134,7 +134,8 @@ export default {
       )
         prefixSlides.unshift(i)
 
-      for (let i = 0; i <= visibleSlideCount * 2; i += 1) suffixSlides.push(i)
+      for (let i = 0; i < Math.ceil(visibleSlideCount); i += 1)
+        suffixSlides.push(i)
 
       return [...prefixSlides, ...slides, ...suffixSlides]
     },
@@ -366,7 +367,7 @@ export default {
     /**
      * Emit the slide-change event with the new slide index.
      * The slide index will refer to the slot index and not the
-     * actual slide-index due to thee indexes changing when loop
+     * actual slide-index due to the indexes changing when loop
      * is set to true.
      * @event slide-change
      * @property {number} slide The new slide index.
@@ -786,7 +787,7 @@ export default {
      */
     setCurrentSlide(slideNumber) {
       this.currentSlide = slideNumber
-      this.emitSlideChange()
+      this.emitSlideChange(slideNumber)
     },
     /**
      * Set the distance of how far user has dragged with touch event.

@@ -59,8 +59,8 @@ export default {
       slideCount: 10,
       showPagination: false,
       touchDrag: true,
-      autoplayInterval: 3000,
-      transitionDuration: 4000
+      autoplayInterval: 2500,
+      transitionDuration: 1000
     }
   }
 }
@@ -68,6 +68,7 @@ export default {
 
 <style lang="scss">
 #app {
+  padding-bottom: 20000px;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
