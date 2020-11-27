@@ -277,6 +277,22 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   </tbody>
 </table>
 
+### Event API
+<table>
+  <thead>
+    <th>Event</th>
+    <th>type</th>
+    <th>Description</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>slide-change</td>
+      <td>number</td>
+      <td>Emits the new slide number on slide-change.</td>
+    </tr>
+  </tbody>
+</table>
+
 ### Styling
 
 Although the controls have options to pass styling through a JS object, this isn't always ideal, especially when you want to use your own CSS variables and mixins. You will find below a list of CSS classes that you can target to override existing styles.
