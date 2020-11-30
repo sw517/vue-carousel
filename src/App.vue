@@ -4,7 +4,7 @@
       :config="{
         debug,
         loop,
-        mouseDrag: false,
+        mouseDrag: true,
         showEmptySpace: false,
         autoplay,
         touchDrag,
@@ -12,7 +12,7 @@
           showPagination
         },
         transitionDuration,
-        transitionTimingFunction: 'linear',
+        transitionTimingFunction: 'ease',
         autoplayInterval,
         slidesVisible: {
           xs: 2,
@@ -22,10 +22,10 @@
       }"
     >
       <template v-for="n in Number(slideCount)" v-slot:[n-1]>
-        <a href="/" :key="n - 1">
+        <div :key="n - 1">
           <img src="./assets/logo.png" alt="Logo" />
           <div>{{ n }}</div>
-        </a>
+        </div>
       </template>
       <template v-slot:previous><span>Previous</span></template>
       <template v-slot:next><span>Next</span></template>
@@ -60,7 +60,7 @@ export default {
       showPagination: false,
       touchDrag: true,
       autoplayInterval: 2500,
-      transitionDuration: 1000
+      transitionDuration: 300
     }
   }
 }

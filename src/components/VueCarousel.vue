@@ -1083,11 +1083,8 @@ export default {
   }
 
   &--draggable {
-    cursor: grab;
-
-    button,
-    a {
-      cursor: pointer;
+    .v-carousel__cycle {
+      cursor: grab;
     }
   }
 }

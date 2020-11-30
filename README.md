@@ -336,7 +336,6 @@ If you set a breakpoint to become static, you may want to change the layout of t
 
 ---
 
-
 ### Troubleshooting
 
 Note: Ensure that you do not apply any attributes to slide slots within the carousel that should not be duplicated such as `id` as if you set `loop` to `true`, the content in these slides will be duplicated and will cause issues.
@@ -359,3 +358,11 @@ Example
 }
 </style>
 ```
+
+#### The carousel won't autoplay when off-screen
+
+The carousel uses an [Intersection Observer](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) to remove the autoplay-interval when the carousel is not visible on screen.
+
+This has been done to improve efficiency of the browser so that the carousel is not carrying out performance-expensive animations that may interfer with the user's experience.
+
+Autoplay will be enabled again when the carousel is visible again.

@@ -17,6 +17,7 @@
     "build:umd": "rollup --config build/rollup.config.js --format umd --file dist/vue-carousel.umd.js",
     "build:es": "rollup --config build/rollup.config.js --format es --file dist/vue-carousel.esm.js",
     "build:unpkg": "rollup --config build/rollup.config.js --format iife --file dist/vue-carousel.min.js",
+    "prebuild": "npm run test",
     "serve": "vue-cli-service serve",
     "test": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"

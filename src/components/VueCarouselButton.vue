@@ -22,17 +22,20 @@ export default {
 .v-carousel-btn {
   appearance: none;
   -webkit-appearance: none;
-  border: 0;
-  border-radius: 6px;
-  background-color: rgba(250, 250, 250, 0.7);
+  border: 1px solid #35495e;
+  border-radius: 10px;
+  background-color: #5fc59d;
   box-shadow: 0 2px 2px 0px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   padding: 4px 8px;
-  transition: background-color ease 0.2s;
-  will-change: background-color;
+  color: #35495e;
+  transition: border-radius ease 0.2s;
+  will-change: border-radius;
 
-  &:hover {
-    background-color: #fff;
+  @media (pointer: fine) {
+    &:hover {
+      border-radius: 4px;
+    }
   }
 }
 </style>
