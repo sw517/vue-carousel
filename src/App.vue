@@ -9,11 +9,13 @@
         autoplay,
         touchDrag,
         controls: {
-          showPagination
+          showPagination,
+          showPlay: true
         },
         transitionDuration,
         transitionTimingFunction: 'ease',
         autoplayInterval,
+        autoplayHoverPause: true,
         slidesVisible: {
           xs: 2,
           sm: 3.5,

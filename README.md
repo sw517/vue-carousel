@@ -150,11 +150,14 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
 {
   previous: "&amp;lt;",
   next: "&amp;gt;",
+  play: 'Play',
+  pause: 'Pause',
   buttonStyles: null,
+  paginationNumbered: false,
+  paginationStyles: null,
   showButtons: true,
   showPagination: false,
-  paginationNumbered: false,
-  paginationStyles: null
+  showPlay: false,
 }
 </code></pre>
       </td>

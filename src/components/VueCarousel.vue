@@ -1,9 +1,5 @@
 <template>
   <div
-    @mouseenter="onMouseOver"
-    @mouseleave="onMouseOut"
-    @mousedown="onMouseOver"
-    @mouseup="onMouseOut"
     :class="[
       {
         'v-carousel--static': isStatic,
@@ -17,8 +13,8 @@
       v-if="!isStatic && isTrue(sliderConfig.controls.showButtons)"
     >
       <VueCarouselButton
-        @click.native="handleControlBtnClick(-1)"
-        @click="handleControlBtnClick(-1)"
+        @click.native="handleIncrementButtonClick(-1)"
+        @click="handleIncrementButtonClick(-1)"
         :style="sliderConfig.controls.buttonStyles"
         aria-label="Previous Slide"
         class="v-carousel__controls__btn v-carousel__controls__btn--prev"
@@ -31,8 +27,8 @@
         </slot>
       </VueCarouselButton>
       <VueCarouselButton
-        @click.native="handleControlBtnClick(1)"
-        @click="handleControlBtnClick(1)"
+        @click.native="handleIncrementButtonClick(1)"
+        @click="handleIncrementButtonClick(1)"
         :style="sliderConfig.controls.buttonStyles"
         aria-label="Next Slide"
         class="v-carousel__controls__btn v-carousel__controls__btn--next"
@@ -44,8 +40,26 @@
           <span v-html="sliderConfig.controls.next" />
         </slot>
       </VueCarouselButton>
+      <VueCarouselButton
+        v-if="cShowPlayButton"
+        @click.native="handlePlayButtonClick"
+        :style="sliderConfig.controls.buttonStyles"
+        :aria-label="cPlayAriaLabel"
+        class="v-carousel__controls__btn v-carousel__controls__btn--play"
+      >
+        <slot name="play">
+          <span v-html="cPlayButtonContent" />
+        </slot>
+      </VueCarouselButton>
     </div>
-    <div ref="v-carousel-wrap" class="v-carousel__wrap">
+    <div
+      ref="v-carousel-wrap"
+      class="v-carousel__wrap"
+      @mouseenter="onMouseOver"
+      @mouseleave="onMouseOut"
+      @mousedown="onMouseOver"
+      @mouseup="onMouseOut"
+    >
       <div ref="cycle" :style="cCycleStyles" class="v-carousel__cycle">
         <div
           v-for="(slot, index) in cSlideIndexArray"
@@ -103,6 +117,7 @@ export default {
       dragPosition: null,
       isSkippingSlides: false,
       isStatic: false,
+      manuallyPaused: false,
       observer: null,
       slideCount: this.setSlideCount(),
       sliderConfig: {},
@@ -118,39 +133,6 @@ export default {
     }
   },
   computed: {
-    cSlideIndexArray() {
-      const slides = []
-      for (let i = 0; i < this.slideCount; i += 1) slides.push(i)
-      if (!this.sliderConfig.loop || this.isStatic) return slides
-
-      const prefixSlides = []
-      const suffixSlides = []
-      const visibleSlideCount = Math.ceil(this.visibleSlideCount)
-
-      for (
-        let i = this.slideCount - 1;
-        i >= this.slideCount - visibleSlideCount;
-        i -= 1
-      )
-        prefixSlides.unshift(i)
-
-      for (let i = 0; i < Math.ceil(visibleSlideCount); i += 1)
-        suffixSlides.push(i)
-
-      return [...prefixSlides, ...slides, ...suffixSlides]
-    },
-    /**
-     * Returns the CSS Styles for the individual slides.
-     * Only styles the slides if not static.
-     */
-    cSlideStyles() {
-      return {
-        minWidth: this.isStatic ? null : `${100 / this.visibleSlideCount}%`,
-        width: this.isStatic ? null : `${100 / this.visibleSlideCount}%`,
-        paddingLeft: this.getSlidePadding(this.sliderConfig.slidePadding),
-        paddingRight: this.getSlidePadding(this.sliderConfig.slidePadding)
-      }
-    },
     /**
      * Returns the CSS Styles for the carousel cycle.
      * Only styles if not static.
@@ -183,11 +165,75 @@ export default {
         ? this.slideCount
         : this.slideCount - Math.floor(this.visibleSlideCount) + 1
     },
+    /**
+     * Returns current slide for pagination component.
+     * Converts currentSlide (base-zero) into base-one for the
+     * pagination so starting page is 1.
+     */
     cPaginationCurrent() {
       if (isTrue(this.sliderConfig.loop)) {
         return this.currentSlide - Math.ceil(this.visibleSlideCount) + 1
       } else {
         return this.currentSlide + 1
+      }
+    },
+    cPlayAriaLabel() {
+      if (this.autoplayIntervalId) {
+        return 'Pause Carousel'
+      } else {
+        return 'Play Carousel'
+      }
+    },
+    cPlayButtonContent() {
+      if (this.autoplayIntervalId) {
+        return this.sliderConfig.controls.pause
+      } else {
+        return this.sliderConfig.controls.play
+      }
+    },
+    cShowPlayButton() {
+      return (
+        isTrue(this.sliderConfig.autoplay) &&
+        isTrue(this.sliderConfig.controls.showPlay)
+      )
+    },
+    /**
+     * Returns an array of numbers where each number represents
+     * a v-slot. We sandwich the numbers 0-{slide-count} with
+     * a repeat of numbers to give an illusion of an infinite array.
+     * E.g [4,5,6,0,1,2,3,4,5,6,0,1,2,3]
+     */
+    cSlideIndexArray() {
+      const slides = []
+      for (let i = 0; i < this.slideCount; i += 1) slides.push(i)
+      if (!this.sliderConfig.loop || this.isStatic) return slides
+
+      const prefixSlides = []
+      const suffixSlides = []
+      const visibleSlideCount = Math.ceil(this.visibleSlideCount)
+
+      for (
+        let i = this.slideCount - 1;
+        i >= this.slideCount - visibleSlideCount;
+        i -= 1
+      )
+        prefixSlides.unshift(i)
+
+      for (let i = 0; i < Math.ceil(visibleSlideCount); i += 1)
+        suffixSlides.push(i)
+
+      return [...prefixSlides, ...slides, ...suffixSlides]
+    },
+    /**
+     * Returns the CSS Styles for the individual slides.
+     * Only styles the slides if not static.
+     */
+    cSlideStyles() {
+      return {
+        minWidth: this.isStatic ? null : `${100 / this.visibleSlideCount}%`,
+        width: this.isStatic ? null : `${100 / this.visibleSlideCount}%`,
+        paddingLeft: this.getSlidePadding(this.sliderConfig.slidePadding),
+        paddingRight: this.getSlidePadding(this.sliderConfig.slidePadding)
       }
     }
   },
@@ -436,7 +482,7 @@ export default {
 
       return padding
     },
-    handleControlBtnClick(increment) {
+    handleIncrementButtonClick(increment) {
       if (isTrue(this.sliderConfig.loop)) {
         this.handleIncrementWithLoop(increment)
       } else {
@@ -532,6 +578,20 @@ export default {
       })
     },
     /**
+     * If autoplay is currently enabled, remove the interval
+     * on click to pause the carousel, else re-add the interval
+     * if autoplay is paused.
+     */
+    handlePlayButtonClick() {
+      if (this.autoplayIntervalId) {
+        this.removeAutoplayInterval()
+        this.manuallyPaused = true
+      } else {
+        this.setAutoplayInterval()
+        this.manuallyPaused = false
+      }
+    },
+    /**
      * Handle logic from touch end and move events.
      * If user is still dragging the carousel cycle, update the drag position,
      * else handle updating the pagination.
@@ -600,7 +660,7 @@ export default {
     /**
      * On mouseout, if autoplayHoverPause is set to true, re-add
      * the setInterval for autoplay which would have been removed
-     * on mouseover.
+     * on mouseover (only if carousel is not manually paused).
      */
     onMouseOut() {
       if (isTrue(this.sliderConfig.autoplayHoverPause)) {
@@ -609,7 +669,7 @@ export default {
     },
     /**
      * On mouseover, if autoplayHoverPause is set to true, remove
-     * the setInterval for autoplay. This will be re-addede on mouseout.
+     * the setInterval for autoplay. This will be re-added on mouseout.
      */
     onMouseOver() {
       if (isTrue(this.sliderConfig.autoplayHoverPause)) {
@@ -737,7 +797,11 @@ export default {
      * increment the current slide.
      */
     setAutoplayInterval() {
-      if (!this.autoplayIntervalId && isTrue(this.sliderConfig.autoplay)) {
+      if (
+        !this.autoplayIntervalId &&
+        isTrue(this.sliderConfig.autoplay) &&
+        !this.manuallyPaused
+      ) {
         this.autoplayIntervalId = setInterval(
           this.autoIncrement,
           this.sliderConfig.autoplayInterval
@@ -890,11 +954,14 @@ export default {
         controls: {
           previous: '&lt;',
           next: '&gt;',
+          play: 'Play',
+          pause: 'Pause',
           buttonStyles: null,
           paginationNumbered: false,
           paginationStyles: null,
           showButtons: true,
-          showPagination: false
+          showPagination: false,
+          showPlay: false
         },
         debug: false,
         loop: false,
@@ -1108,6 +1175,14 @@ export default {
   &--next {
     left: auto;
     right: 0;
+  }
+
+  &--play {
+    transform: none;
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: auto;
   }
 
   &--disabled {
