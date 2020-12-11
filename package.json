@@ -1,6 +1,6 @@
 {
   "name": "@samwood/vue-carousel",
-  "version": "0.1.89",
+  "version": "0.1.91",
   "author": "Sam Wood",
   "main": "dist/vue-carousel.umd.js",
   "module": "dist/vue-carousel.esm.js",
@@ -23,8 +23,8 @@
     "build:umd": "rollup --config build/rollup.config.js --format umd --file dist/vue-carousel.umd.js",
     "build:es": "rollup --config build/rollup.config.js --format es --file dist/vue-carousel.esm.js",
     "build:unpkg": "rollup --config build/rollup.config.js --format iife --file dist/vue-carousel.min.js",
-    "publish-test": "npm run test && npm publish --dry-run --access public",
-    "publish-prod": "npm run test && npm publish --access public",
+    "publish-test": "npm run test && npm run build && npm publish --dry-run --access public",
+    "publish-prod": "npm run test && npm run build && npm publish --access public",
     "serve": "vue-cli-service serve",
     "test": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"

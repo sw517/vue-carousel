@@ -189,7 +189,7 @@ export default {
       }
     },
     cShowButtons() {
-      return !this.isStatic && isTrue(this.sliderConfig.controls.showButtons)
+      return isTrue(this.sliderConfig.controls.showButtons)
     },
     cShowControls() {
       return (
