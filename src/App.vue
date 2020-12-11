@@ -15,7 +15,7 @@
         transitionDuration,
         transitionTimingFunction: 'ease',
         autoplayInterval,
-        autoplayHoverPause: true,
+        autoplayHoverPause: false,
         slidesVisible: {
           xs: 2,
           sm: 3.5,

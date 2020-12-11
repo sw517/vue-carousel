@@ -13,28 +13,26 @@
       v-if="!isStatic && isTrue(sliderConfig.controls.showButtons)"
     >
       <VueCarouselButton
-        @click.native="handleIncrementButtonClick(-1)"
-        @click="handleIncrementButtonClick(-1)"
         :style="sliderConfig.controls.buttonStyles"
-        aria-label="Previous Slide"
-        class="v-carousel__controls__btn v-carousel__controls__btn--prev"
         :class="{
           'v-carousel__controls__btn--disabled': isButtonDisabled('prev')
         }"
+        class="v-carousel__controls__btn v-carousel__controls__btn--prev"
+        aria-label="Previous Slide"
+        @click.native="handleIncrementButtonClick(-1)"
       >
         <slot name="previous">
           <span v-html="sliderConfig.controls.previous" />
         </slot>
       </VueCarouselButton>
       <VueCarouselButton
-        @click.native="handleIncrementButtonClick(1)"
-        @click="handleIncrementButtonClick(1)"
         :style="sliderConfig.controls.buttonStyles"
-        aria-label="Next Slide"
-        class="v-carousel__controls__btn v-carousel__controls__btn--next"
         :class="{
           'v-carousel__controls__btn--disabled': isButtonDisabled('next')
         }"
+        class="v-carousel__controls__btn v-carousel__controls__btn--next"
+        aria-label="Next Slide"
+        @click.native="handleIncrementButtonClick(1)"
       >
         <slot name="next">
           <span v-html="sliderConfig.controls.next" />
@@ -42,10 +40,10 @@
       </VueCarouselButton>
       <VueCarouselButton
         v-if="cShowPlayButton"
-        @click.native="handlePlayButtonClick"
         :style="sliderConfig.controls.buttonStyles"
         :aria-label="cPlayAriaLabel"
         class="v-carousel__controls__btn v-carousel__controls__btn--play"
+        @click.native="handlePlayButtonClick"
       >
         <slot name="play">
           <span v-html="cPlayButtonContent" />
@@ -586,11 +584,11 @@ export default {
      */
     handlePlayButtonClick() {
       if (this.autoplayIntervalId) {
-        this.removeAutoplayInterval()
         this.manuallyPaused = true
+        this.removeAutoplayInterval()
       } else {
-        this.setAutoplayInterval()
         this.manuallyPaused = false
+        this.setAutoplayInterval()
       }
     },
     /**
