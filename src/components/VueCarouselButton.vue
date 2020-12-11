@@ -22,12 +22,12 @@ export default {
 .v-carousel-btn {
   appearance: none;
   -webkit-appearance: none;
-  border: 1px solid #35495e;
   border-radius: 10px;
+  border: 0;
   background-color: #5fc59d;
   box-shadow: 0 2px 2px 0px rgba(0, 0, 0, 0.4);
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 4px 12px;
   color: #35495e;
   transition: border-radius ease 0.2s;
   will-change: border-radius;

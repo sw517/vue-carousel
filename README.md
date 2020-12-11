@@ -353,7 +353,7 @@ If you are using scoped styles, ensure that you are using `::v-deep` before targ
 
 Example
 ```scss
-<style lang="scss>
+<style lang="scss scoped>
 .my-component {
   & ::v-deep .v-carousel--static {
     display: grid;

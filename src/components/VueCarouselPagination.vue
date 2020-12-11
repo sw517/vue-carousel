@@ -13,7 +13,7 @@
           :style="$props.buttonStyles"
           :aria-label="`Goto Page ${index + 1}`"
           :aria-current="Number($props.current) === index + 1"
-          :title="`Goto Page ${index + 1}`"
+          :title="`Go to Page ${index + 1}`"
           :class="{
             'v-carousel-pagination__btn--active':
               Number($props.current) === index + 1,
@@ -94,7 +94,7 @@ export default {
     max-width: 12px;
     height: 12px;
     background-color: #fff;
-    border: 2px solid #35495e;
+    border: 1px solid #35495e;
     border-radius: 999px;
     padding: 0;
     margin-left: 5px;

@@ -51,6 +51,16 @@
           <span v-html="cPlayButtonContent" />
         </slot>
       </VueCarouselButton>
+      <VueCarouselPagination
+        v-if="
+          this.slideCount > 0 && isTrue(sliderConfig.controls.showPagination)
+        "
+        :count="cPaginationCount"
+        :current="cPaginationCurrent"
+        :button-styles="sliderConfig.controls.paginationStyles"
+        :numbered="sliderConfig.controls.paginationNumbered"
+        @pagination-click="onPaginationButtonClick"
+      />
     </div>
     <div
       ref="v-carousel-wrap"
@@ -71,14 +81,6 @@
         </div>
       </div>
     </div>
-    <VueCarouselPagination
-      v-if="this.slideCount > 0 && isTrue(sliderConfig.controls.showPagination)"
-      :count="cPaginationCount"
-      :current="cPaginationCurrent"
-      :button-styles="sliderConfig.controls.paginationStyles"
-      :numbered="sliderConfig.controls.paginationNumbered"
-      @pagination-click="onPaginationButtonClick"
-    />
   </div>
 </template>
 
@@ -1140,6 +1142,8 @@ export default {
 <style lang="scss">
 .v-carousel {
   position: relative;
+  display: flex;
+  flex-wrap: wrap;
 
   // Fallback slide width styles
   &:not(.v-carousel--static) {
@@ -1157,6 +1161,8 @@ export default {
 }
 
 .v-carousel__wrap {
+  order: 1;
+  flex-basis: 100%;
   overflow: hidden;
 }
 
@@ -1165,23 +1171,28 @@ export default {
   transition: transform ease 0.5s;
 }
 
+.v-carousel__controls {
+  order: 2;
+  flex-basis: 100%;
+}
+
 .v-carousel__controls__btn {
   position: absolute;
   top: 50%;
-  left: 0;
+  left: 1rem;
   transform: translateY(-50%);
   z-index: 10;
 
   &--next {
     left: auto;
-    right: 0;
+    right: 1rem;
   }
 
   &--play {
     transform: none;
     top: auto;
-    bottom: 0;
-    right: 0;
+    bottom: 1rem;
+    right: 1rem;
     left: auto;
   }
 
