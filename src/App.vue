@@ -10,7 +10,8 @@
         touchDrag,
         controls: {
           showPagination,
-          showPlay: true
+          showPlay: true,
+          showButtons: false
         },
         transitionDuration,
         transitionTimingFunction: 'ease',

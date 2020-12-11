@@ -8,36 +8,35 @@
     ]"
     class="v-carousel"
   >
-    <div
-      class="v-carousel__controls"
-      v-if="!isStatic && isTrue(sliderConfig.controls.showButtons)"
-    >
-      <VueCarouselButton
-        :style="sliderConfig.controls.buttonStyles"
-        :class="{
-          'v-carousel__controls__btn--disabled': isButtonDisabled('prev')
-        }"
-        class="v-carousel__controls__btn v-carousel__controls__btn--prev"
-        aria-label="Previous Slide"
-        @click.native="handleIncrementButtonClick(-1)"
-      >
-        <slot name="previous">
-          <span v-html="sliderConfig.controls.previous" />
-        </slot>
-      </VueCarouselButton>
-      <VueCarouselButton
-        :style="sliderConfig.controls.buttonStyles"
-        :class="{
-          'v-carousel__controls__btn--disabled': isButtonDisabled('next')
-        }"
-        class="v-carousel__controls__btn v-carousel__controls__btn--next"
-        aria-label="Next Slide"
-        @click.native="handleIncrementButtonClick(1)"
-      >
-        <slot name="next">
-          <span v-html="sliderConfig.controls.next" />
-        </slot>
-      </VueCarouselButton>
+    <div v-if="cShowControls" class="v-carousel__controls">
+      <template v-if="cShowButtons">
+        <VueCarouselButton
+          :style="sliderConfig.controls.buttonStyles"
+          :class="{
+            'v-carousel__controls__btn--disabled': isButtonDisabled('prev')
+          }"
+          class="v-carousel__controls__btn v-carousel__controls__btn--prev"
+          aria-label="Previous Slide"
+          @click.native="handleIncrementButtonClick(-1)"
+        >
+          <slot name="previous">
+            <span v-html="sliderConfig.controls.previous" />
+          </slot>
+        </VueCarouselButton>
+        <VueCarouselButton
+          :style="sliderConfig.controls.buttonStyles"
+          :class="{
+            'v-carousel__controls__btn--disabled': isButtonDisabled('next')
+          }"
+          class="v-carousel__controls__btn v-carousel__controls__btn--next"
+          aria-label="Next Slide"
+          @click.native="handleIncrementButtonClick(1)"
+        >
+          <slot name="next">
+            <span v-html="sliderConfig.controls.next" />
+          </slot>
+        </VueCarouselButton>
+      </template>
       <VueCarouselButton
         v-if="cShowPlayButton"
         :style="sliderConfig.controls.buttonStyles"
@@ -50,9 +49,7 @@
         </slot>
       </VueCarouselButton>
       <VueCarouselPagination
-        v-if="
-          this.slideCount > 0 && isTrue(sliderConfig.controls.showPagination)
-        "
+        v-if="cShowPagination"
         :count="cPaginationCount"
         :current="cPaginationCurrent"
         :button-styles="sliderConfig.controls.paginationStyles"
@@ -190,6 +187,17 @@ export default {
       } else {
         return this.sliderConfig.controls.play
       }
+    },
+    cShowButtons() {
+      return !this.isStatic && isTrue(this.sliderConfig.controls.showButtons)
+    },
+    cShowControls() {
+      return this.cShowButtons || this.cShowPagination || this.cShowPlayButton
+    },
+    cShowPagination() {
+      return (
+        this.slideCount > 0 && isTrue(this.sliderConfig.controls.showPagination)
+      )
     },
     cShowPlayButton() {
       return (
