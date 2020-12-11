@@ -192,7 +192,10 @@ export default {
       return !this.isStatic && isTrue(this.sliderConfig.controls.showButtons)
     },
     cShowControls() {
-      return this.cShowButtons || this.cShowPagination || this.cShowPlayButton
+      return (
+        !this.isStatic &&
+        (this.cShowButtons || this.cShowPagination || this.cShowPlayButton)
+      )
     },
     cShowPagination() {
       return (
