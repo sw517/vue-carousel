@@ -12,6 +12,12 @@
   "browser": {
     "./sfc": "src/vue-carousel.vue"
   },
+  "files": [
+    "dist",
+    "src/components",
+    "src/scripts",
+    "src/wrapper.js"
+  ],
   "scripts": {
     "build": "npm run build:umd & npm run build:es & npm run build:unpkg",
     "build:umd": "rollup --config build/rollup.config.js --format umd --file dist/vue-carousel.umd.js",
