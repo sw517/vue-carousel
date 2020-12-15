@@ -15,6 +15,7 @@
           :class="{
             'v-carousel__controls__btn--disabled': isButtonDisabled('prev')
           }"
+          :tabindex="isButtonDisabled('prev') ? -1 : 0"
           class="v-carousel__controls__btn v-carousel__controls__btn--prev"
           aria-label="Previous Slide"
           @click.native="handleIncrementButtonClick(-1)"
@@ -28,6 +29,7 @@
           :class="{
             'v-carousel__controls__btn--disabled': isButtonDisabled('next')
           }"
+          :tabindex="isButtonDisabled('next') ? -1 : 0"
           class="v-carousel__controls__btn v-carousel__controls__btn--next"
           aria-label="Next Slide"
           @click.native="handleIncrementButtonClick(1)"
@@ -58,7 +60,7 @@
       />
     </div>
     <div
-      ref="v-carousel-wrap"
+      ref="cycle-wrap"
       class="v-carousel__wrap"
       @mouseenter="onMouseOver"
       @mouseleave="onMouseOut"
@@ -138,27 +140,37 @@ export default {
       if (this.isStatic) return null
 
       let transform, transition
+      let slideWidth = this.carouselWidth / this.visibleSlideCount
       const { transitionDuration, transitionTimingFunction } = this.sliderConfig
 
       if (this.dragPosition) {
-        transform =
-          (this.currentSlide * this.carouselWidth) / this.visibleSlideCount -
-          this.dragPosition
+        transform = -(this.currentSlide * slideWidth - this.dragPosition)
       } else {
-        transform =
-          (this.currentSlide * this.carouselWidth) / this.visibleSlideCount
+        transform = -(this.currentSlide * slideWidth)
         transition = `transform ${transitionDuration}ms ${transitionTimingFunction}`
       }
 
+      if (isTrue(this.sliderConfig.center)) {
+        const offset = this.carouselWidth / 2 - slideWidth / 2
+        transform = transform + offset
+      }
+
       return {
-        transform: `translateX(-${transform}px)`,
+        transform: `translateX(${transform}px)`,
         transition:
           this.disableTransition || this.dragPosition ? 'none' : transition
       }
     },
+    cCanIncrementToLast() {
+      return (
+        isTrue(this.sliderConfig.center) ||
+        isTrue(this.sliderConfig.showEmptySpace)
+      )
+    },
     cPaginationCount() {
-      return isTrue(this.sliderConfig.showEmptySpace) ||
-        isTrue(this.sliderConfig.loop)
+      return this.cCanIncrementToLast ||
+        isTrue(this.sliderConfig.loop) ||
+        isTrue(this.sliderConfig.center)
         ? this.slideCount
         : this.slideCount - Math.floor(this.visibleSlideCount) + 1
     },
@@ -340,7 +352,7 @@ export default {
      * and timestamps to detirmine the direction of the mouse drag.
      */
     addMouseDragListeners() {
-      const carousel = this.$refs['v-carousel-wrap']
+      const carousel = this.$refs['cycle-wrap']
 
       carousel.addEventListener('mousedown', this.recordPressDownStart)
       carousel.addEventListener('mouseup', this.recordPressDownEnd)
@@ -360,7 +372,7 @@ export default {
      * and timestamps to detirmine the direction of the touch swipe.
      */
     addTouchDragListeners() {
-      const carousel = this.$refs['v-carousel-wrap']
+      const carousel = this.$refs['cycle-wrap']
 
       carousel.addEventListener('touchstart', this.recordPressDownStart)
       carousel.addEventListener('touchend', this.recordPressDownEnd)
@@ -517,14 +529,14 @@ export default {
       } else {
         // Handle move to next slide.
         if (
-          (isTrue(this.sliderConfig.showEmptySpace) &&
+          (this.cCanIncrementToLast &&
             this.currentSlide + increment < this.slideCount) ||
           this.currentSlide + increment <
             this.slideCount - this.visibleSlideCount
         ) {
           this.setCurrentSlide(this.currentSlide + increment)
         } else if (
-          !isTrue(this.sliderConfig.showEmptySpace) &&
+          !this.cCanIncrementToLast &&
           this.currentSlide + increment >=
             this.slideCount - Math.floor(this.visibleSlideCount)
         ) {
@@ -659,10 +671,10 @@ export default {
 
       if (this.currentSlide === 0 && button === 'prev') return true
       if (
-        (!isTrue(this.sliderConfig.showEmptySpace) &&
+        (!this.cCanIncrementToLast &&
           this.currentSlide === this.slideCount - this.visibleSlideCount &&
           button === 'next') ||
-        (isTrue(this.sliderConfig.showEmptySpace) &&
+        (this.cCanIncrementToLast &&
           this.currentSlide === this.slideCount - 1 &&
           button === 'next')
       )
@@ -776,7 +788,7 @@ export default {
      * when the config prop updates and the watcher resets the carousel.
      */
     removeMouseDragListeners() {
-      const carousel = this.$refs['v-carousel-wrap']
+      const carousel = this.$refs['cycle-wrap']
 
       carousel.removeEventListener('mousedown', this.recordPressDownStart)
       carousel.removeEventListener('mouseup', this.recordPressDownEnd)
@@ -795,7 +807,7 @@ export default {
      * when the config prop updates and the watcher resets the carousel.
      */
     removeTouchDragListeners() {
-      const carousel = this.$refs['v-carousel-wrap']
+      const carousel = this.$refs['cycle-wrap']
 
       carousel.removeEventListener('touchstart', this.recordPressDownStart)
       carousel.removeEventListener('touchend', this.recordPressDownEnd)
@@ -850,7 +862,7 @@ export default {
      * Called on mounted() and on window resize.
      */
     setCarouselWidth() {
-      this.carouselWidth = this.$refs['v-carousel-wrap'].clientWidth
+      this.carouselWidth = this.$refs['cycle-wrap'].clientWidth
     },
     /**
      * Set the currenet slide number. This is used for the transform value
@@ -962,6 +974,7 @@ export default {
           lg: 1200,
           xl: 1600
         },
+        center: false,
         controls: {
           previous: '&lt;',
           next: '&gt;',

@@ -2,21 +2,9 @@
   <div id="app">
     <VueCarousel
       :config="{
-        debug,
-        loop,
-        mouseDrag: true,
-        showEmptySpace: false,
-        autoplay,
-        touchDrag,
-        controls: {
-          showPagination,
-          showPlay: true,
-          showButtons: false
-        },
-        transitionDuration,
-        transitionTimingFunction: 'ease',
-        autoplayInterval,
-        autoplayHoverPause: false,
+        debug: true,
+        loop: true,
+        center: true,
         slidesVisible: {
           xs: 2,
           sm: 3.5,
@@ -33,16 +21,6 @@
       <template v-slot:previous><span>Previous</span></template>
       <template v-slot:next><span>Next</span></template>
     </VueCarousel>
-    <div>Loop</div>
-    <input type="checkbox" v-model="loop" />
-    <div>Autoplay</div>
-    <input type="checkbox" v-model="autoplay" />
-    <div>Slidecount</div>
-    <input type="Number" v-model="slideCount" />
-    <div>Show Pagination</div>
-    <input type="checkbox" v-model="showPagination" />
-    <div>TouchDrag</div>
-    <input type="checkbox" v-model="touchDrag" />
   </div>
 </template>
 
@@ -56,14 +34,7 @@ export default {
   },
   data() {
     return {
-      loop: false,
-      autoplay: false,
-      debug: true,
-      slideCount: 10,
-      showPagination: false,
-      touchDrag: true,
-      autoplayInterval: 2500,
-      transitionDuration: 300
+      slideCount: 10
     }
   }
 }

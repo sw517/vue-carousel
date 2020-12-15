@@ -141,6 +141,13 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
       </td>
       <td>Customise the breakpoints. All breakpoints must be defined and values must be valid or default will be used.</td>
     </tr>
+    <!-- center -->
+    <tr>
+      <td>center</td>
+      <td>Boolean</td>
+      <td><pre><code class="language-javascript">false</code></pre></td>
+      <td>Aligns the current slide in the center of the carousel instead of to the left-side.</td>
+    </tr>
     <!-- controls -->
     <tr>
       <td>controls</td>
