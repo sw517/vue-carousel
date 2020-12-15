@@ -11,6 +11,7 @@
     <div v-if="cShowControls" class="v-carousel__controls">
       <template v-if="cShowButtons">
         <VueCarouselButton
+          ref="prev"
           :style="sliderConfig.controls.buttonStyles"
           :class="{
             'v-carousel__controls__btn--disabled': isButtonDisabled('prev')
@@ -25,6 +26,7 @@
           </slot>
         </VueCarouselButton>
         <VueCarouselButton
+          ref="next"
           :style="sliderConfig.controls.buttonStyles"
           :class="{
             'v-carousel__controls__btn--disabled': isButtonDisabled('next')
@@ -510,6 +512,13 @@ export default {
         this.handleIncrementWithLoop(increment)
       } else {
         this.handleIncrement(increment)
+      }
+
+      // If button becomes disabled, remove focus.
+      if (increment === -1 && this.isButtonDisabled('prev')) {
+        this.$refs.prev.$el.blur()
+      } else if (increment === 1 && this.isButtonDisabled('next')) {
+        this.$refs.next.$el.blur()
       }
     },
     /**
