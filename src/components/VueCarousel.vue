@@ -122,6 +122,7 @@ export default {
       observer: null,
       slideCount: this.setSlideCount(),
       sliderConfig: {},
+      startingSlide: 0,
       touchEvent: {
         swipeStartPosition: null,
         swipeEndPosition: null,
@@ -281,6 +282,8 @@ export default {
         this.setSlideCount()
         this.setIsStatic()
         this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
+        this.setStartingSlide()
+        this.setCurrentSlide(this.startingSlide)
 
         if (this.sliderConfig.loop) {
           this.skipToSlide(Math.ceil(this.visibleSlideCount))
@@ -315,13 +318,8 @@ export default {
     this.setIsStatic()
     this.setCarouselWidth()
     this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
-
-    if (isTrue(this.sliderConfig.loop)) {
-      this.setCurrentSlide(Math.ceil(this.visibleSlideCount))
-    } else {
-      this.setCurrentSlide(0)
-    }
-
+    this.setStartingSlide()
+    this.setCurrentSlide(this.startingSlide)
     this.addResizeListener()
 
     if (isTrue(this.sliderConfig.touchDrag)) {
@@ -437,15 +435,17 @@ export default {
     },
     /**
      * Emit the slide-change event with the new slide index.
-     * The slide index will refer to the slot index and not the
-     * actual slide-index due to the indexes changing when loop
-     * is set to true.
+     * The slide index will be translated to the v-slot index
+     * if loop is true.
      * @event slide-change
      * @property {number} slide The new slide index.
      */
     emitSlideChange(slide) {
-      // Todo: change value of slide if loop is true
-      this.$emit('slide-change', slide)
+      if (isTrue(this.sliderConfig.loop)) {
+        this.$emit('slide-change', slide - Math.ceil(this.visibleSlideCount))
+      } else {
+        this.$emit('slide-change', slide)
+      }
     },
     /**
      * Enable the carousel transition to animate.
@@ -963,6 +963,14 @@ export default {
       ).length
     },
     /**
+     * Set starting slide index for when carousel renders.
+     */
+    setStartingSlide() {
+      this.startingSlide = this.validateStartingSlide(
+        this.sliderConfig.startingSlide
+      )
+    },
+    /**
      * Merges default slider config and custom props config
      * into one configuration object used by the component.
      *
@@ -1165,6 +1173,43 @@ export default {
         }
         return acc
       }, {})
+    },
+    /**
+     * Validate the starting slide for when the carousel renders. If loop is
+     * true, the starting slide (index) will be translated using visibleSlideCount
+     * because the indeces will not match due to cloning slides to give an
+     * infinite-loop effect.
+     */
+    validateStartingSlide(startSlide) {
+      // Handle NaN or out of range slide by returning fallback values.
+      if (
+        !Number(startSlide) ||
+        Number(startSlide) < 0 ||
+        Number(startSlide) >= this.slideCount
+      ) {
+        this.debug(
+          `Invalid startingSlide value: ${startSlide} \nconfig.startingSlide must be a number between 0 and ${this
+            .slideCount - 1}.`
+        )
+        if (isTrue(this.sliderConfig.loop)) {
+          return Math.ceil(this.visibleSlideCount)
+        } else {
+          return 0
+        }
+      }
+
+      // Translate index if carousel is looped or lower index to keep in range if
+      // showEmptySpace and center are both false.
+      if (isTrue(this.sliderConfig.loop)) {
+        return Number(startSlide) + Math.ceil(this.visibleSlideCount)
+      } else if (
+        !this.cCanIncrementToLast &&
+        Number(startSlide) > this.slideCount - Math.ceil(this.visibleSlideCount)
+      ) {
+        return this.slideCount - Math.ceil(this.visibleSlideCount)
+      } else {
+        return Number(startSlide)
+      }
     }
   }
 }

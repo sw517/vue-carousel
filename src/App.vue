@@ -3,8 +3,9 @@
     <VueCarousel
       :config="{
         debug: true,
+        startingSlide: 10,
         mouseDrag: true,
-        center: true,
+        center: false,
         slidesVisible: {
           xs: 2,
           sm: 3.5,

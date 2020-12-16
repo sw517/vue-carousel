@@ -262,6 +262,14 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
       </td>
       <td>Change the number of slides visible at specific breakpoints. The number can be a whole number or decimal. If a breakpoint is null, the carousel will use the value from a previous breakpoint.</td>
     </tr>
+    <!-- startingSlide -->
+    <tr>
+      <td>startingSlide</td>
+      <td>Number</td>
+      <td><pre><code class="language-javascript">0</code></pre></td>
+      <td>The index of the slide to start on when the carousel renders. If the index is invalid, the default will be used.
+      </td>
+    </tr>
     <!-- staticBreakpoint -->
     <tr>
       <td>staticBreakpoint</td>
