@@ -3,7 +3,7 @@ import VueCarousel from '@/components/VueCarousel'
 import VueCarouselPagination from '@/components/VueCarouselPagination'
 
 describe('Vue Carousel', () => {
-  const slideCount = 20
+  const slideCount = 10
   let slots
 
   beforeEach(() => {
@@ -112,5 +112,78 @@ describe('Vue Carousel', () => {
       so we check the second item (index base zero) for emitted data.
     */
     expect(wrapper.emitted()['slide-change'][1]).toEqual([slideIndexClicked])
+  })
+
+  test('it sets the current slide on render to config.startingSlide if valid', async () => {
+    const startingSlide = 5 // Must be less than slideCount value (slots.length)
+    const wrapper = mount(VueCarousel, {
+      slots,
+      propsData: {
+        config: { startingSlide }
+      }
+    })
+
+    // Valid startingSlide
+    expect(wrapper.vm.$data.startingSlide).toBe(startingSlide)
+    await wrapper.setProps({ config: { loop: true } })
+    expect(wrapper.vm.$data.startingSlide).toBe(
+      wrapper.vm.$data.visibleSlideCount
+    )
+
+    // Negative index should result in fallback value used.
+    const negativeIndex = -1
+    await wrapper.setProps({
+      config: { startingSlide: negativeIndex, loop: false }
+    })
+    expect(wrapper.vm.$data.startingSlide).toBe(0)
+    await wrapper.setProps({
+      config: { startingSlide: negativeIndex, loop: true }
+    })
+    expect(wrapper.vm.$data.startingSlide).toBe(
+      wrapper.vm.$data.visibleSlideCount
+    )
+
+    // Index above slots.length should result in fallback value used.
+    const highIndex = 100
+    await wrapper.setProps({
+      config: { startingSlide: highIndex, loop: false }
+    })
+    expect(wrapper.vm.$data.startingSlide).toBe(0)
+    await wrapper.setProps({ config: { startingSlide: highIndex, loop: true } })
+    expect(wrapper.vm.$data.startingSlide).toBe(
+      wrapper.vm.$data.visibleSlideCount
+    )
+
+    // Valid index that exceeds (slots.length - visibleSlideCount) fallback to
+    // next-highest value if "center" and "showEmptySpace" are false.
+    const validHighIndex = slideCount - 1
+    await wrapper.setProps({
+      config: { startingSlide: validHighIndex, loop: false }
+    })
+    expect(wrapper.vm.$data.startingSlide).toBe(
+      slideCount - wrapper.vm.$data.visibleSlideCount
+    )
+    await wrapper.setProps({
+      config: { startingSlide: validHighIndex, loop: true }
+    })
+    expect(wrapper.vm.$data.startingSlide).toBe(
+      validHighIndex + wrapper.vm.$data.visibleSlideCount
+    )
+
+    // Valid index that exceeds (slots.length - visibleSlideCount) fallback to
+    // next-highest value if either "center" or "showEmptySpace" is true.
+    await wrapper.setProps({
+      config: { startingSlide: validHighIndex, loop: false, center: true }
+    })
+    expect(wrapper.vm.$data.startingSlide).toBe(validHighIndex)
+    await wrapper.setProps({
+      config: {
+        startingSlide: validHighIndex,
+        loop: false,
+        center: false,
+        showEmptySpace: true
+      }
+    })
+    expect(wrapper.vm.$data.startingSlide).toBe(validHighIndex)
   })
 })

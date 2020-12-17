@@ -689,6 +689,7 @@ export default {
     /**
      * Bundles methods for initialising carousel properties.
      * Method can be called when props are updated.
+     * The order of calling bundled methods is important!
      */
     prepareCarousel() {
       this.setCurrentBreakpoint()
