@@ -724,6 +724,7 @@ export default {
      */
     recordPressDownStart(e) {
       // Touch event uses changedTouches, mousedown does not.
+      e.preventDefault()
       let pressEvent = e.changedTouches ? e.changedTouches['0'] : e
       this.touchEvent.swipeStartPosition = pressEvent.pageX
       this.touchEvent.startTimeStamp = e.timeStamp
@@ -1227,6 +1228,10 @@ export default {
   &--draggable {
     .v-carousel__cycle {
       cursor: grab;
+    }
+
+    .v-carousel__slide {
+      user-select: none;
     }
   }
 }
