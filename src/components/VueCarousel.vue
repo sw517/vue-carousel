@@ -385,7 +385,11 @@ export default {
     },
     debug(msg) {
       if (isTrue(this.sliderConfig.debug)) {
-        console.warn(msg)
+        console.warn(
+          `%c@samwood/vue-carousel%c\n\n${msg}`,
+          'background: #5fc59d; padding: 2px 4px;',
+          ''
+        )
       }
     },
     /**
