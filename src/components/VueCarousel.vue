@@ -1014,6 +1014,7 @@ export default {
           lg: null,
           xl: null
         },
+        startingSlide: 0,
         staticBreakpoint: null,
         touchDrag: true,
         transitionDuration: 500,
@@ -1175,7 +1176,7 @@ export default {
     validateStartingSlide(startSlide) {
       // Handle NaN or out of range slide by returning fallback values.
       if (
-        !Number(startSlide) ||
+        (!Number(startSlide) && Number(startSlide) !== 0) ||
         Number(startSlide) < 0 ||
         Number(startSlide) >= this.slideCount
       ) {
