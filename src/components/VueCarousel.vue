@@ -279,30 +279,8 @@ export default {
         this.removeMouseDragListeners()
         this.removeIntersectionObserver()
         this.setUpConfig()
-        this.setSlideCount()
-        this.setIsStatic()
-        this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
-        this.setStartingSlide()
-        this.setCurrentSlide(this.startingSlide)
-
-        if (this.sliderConfig.loop) {
-          this.skipToSlide(Math.ceil(this.visibleSlideCount))
-        } else {
-          this.skipToSlide(0)
-        }
-
-        if (isTrue(this.sliderConfig.touchDrag)) {
-          this.addTouchDragListeners()
-        }
-
-        if (isTrue(this.sliderConfig.mouseDrag)) {
-          this.addMouseDragListeners()
-        }
-
-        if (isTrue(this.sliderConfig.autoplay)) {
-          this.setAutoplayInterval()
-          this.setIntersectionObserver()
-        }
+        this.prepareCarousel()
+        this.skipToSlide(this.startingSlide)
       },
       deep: true
     }
@@ -312,28 +290,10 @@ export default {
     this.setSlideCount()
   },
   mounted() {
-    this.setSlideCount()
     this.recordCurrentWindowWidth()
-    this.setCurrentBreakpoint()
-    this.setIsStatic()
-    this.setCarouselWidth()
-    this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
-    this.setStartingSlide()
+    this.prepareCarousel()
     this.setCurrentSlide(this.startingSlide)
     this.addResizeListener()
-
-    if (isTrue(this.sliderConfig.touchDrag)) {
-      this.addTouchDragListeners()
-    }
-
-    if (isTrue(this.sliderConfig.mouseDrag)) {
-      this.addMouseDragListeners()
-    }
-
-    if (isTrue(this.sliderConfig.autoplay)) {
-      this.setAutoplayInterval()
-      this.setIntersectionObserver()
-    }
   },
   updated() {
     this.setSlideCount()
@@ -344,6 +304,7 @@ export default {
     this.removeTouchDragListeners()
     this.removeMouseDragListeners()
     this.removeAutoplayInterval()
+    this.removeIntersectionObserver()
   },
   methods: {
     isTrue,
@@ -719,6 +680,31 @@ export default {
         this.setCurrentSlide(page - 1 + Math.ceil(this.visibleSlideCount))
       } else {
         this.setCurrentSlide(page - 1)
+      }
+    },
+    /**
+     * Bundles methods for initialising carousel properties.
+     * Method can be called when props are updated.
+     */
+    prepareCarousel() {
+      this.setCurrentBreakpoint()
+      this.setSlideCount()
+      this.setIsStatic()
+      this.setCarouselWidth()
+      this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
+      this.setStartingSlide()
+
+      if (isTrue(this.sliderConfig.touchDrag)) {
+        this.addTouchDragListeners()
+      }
+
+      if (isTrue(this.sliderConfig.mouseDrag)) {
+        this.addMouseDragListeners()
+      }
+
+      if (isTrue(this.sliderConfig.autoplay)) {
+        this.setAutoplayInterval()
+        this.setIntersectionObserver()
       }
     },
     /**
@@ -1188,7 +1174,7 @@ export default {
         Number(startSlide) >= this.slideCount
       ) {
         this.debug(
-          `Invalid startingSlide value: ${startSlide} \nconfig.startingSlide must be a number between 0 and ${this
+          `Invalid startingSlide value: ${startSlide}. \nconfig.startingSlide must be a number between 0 and ${this
             .slideCount - 1}.`
         )
         if (isTrue(this.sliderConfig.loop)) {
@@ -1206,6 +1192,10 @@ export default {
         !this.cCanIncrementToLast &&
         Number(startSlide) > this.slideCount - Math.ceil(this.visibleSlideCount)
       ) {
+        this.debug(
+          `Invalid startingSlide value: ${startSlide}. \nconfig.center and config.showEmptySpace are false therefore highest index allowed is ${this
+            .slideCount - this.visibleSlideCount}.`
+        )
         return this.slideCount - Math.ceil(this.visibleSlideCount)
       } else {
         return Number(startSlide)
