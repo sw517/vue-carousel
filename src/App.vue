@@ -5,6 +5,7 @@
         debug: true,
         mouseDrag: true,
         center: false,
+        startingSlide,
         slidesVisible: {
           xs: 2,
           sm: 3.5,
@@ -21,6 +22,7 @@
       <template v-slot:previous><span>Previous</span></template>
       <template v-slot:next><span>Next</span></template>
     </VueCarousel>
+    <input type="number" v-model="startingSlide" />
   </div>
 </template>
 
@@ -34,7 +36,8 @@ export default {
   },
   data() {
     return {
-      slideCount: 10
+      slideCount: 10,
+      startingSlide: 2
     }
   }
 }

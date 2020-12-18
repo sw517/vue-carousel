@@ -273,12 +273,14 @@ export default {
       this.setIsStatic()
     },
     config: {
-      handler() {
+      async handler() {
         this.removeAutoplayInterval()
         this.removeTouchDragListeners()
         this.removeMouseDragListeners()
         this.removeIntersectionObserver()
         this.setUpConfig()
+        // Wait for setSlideCount in updated() hook.
+        await this.$nextTick()
         this.prepareCarousel()
         this.skipToSlide(this.startingSlide)
       },
