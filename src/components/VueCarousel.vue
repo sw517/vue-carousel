@@ -110,6 +110,7 @@ export default {
   data() {
     return {
       autoplayIntervalId: null,
+      calculatedStartingSlide: 0,
       carouselWidth: null,
       currentBreakpoint: 'xs',
       currentSlide: 0,
@@ -122,7 +123,6 @@ export default {
       observer: null,
       slideCount: this.setSlideCount(),
       sliderConfig: {},
-      startingSlide: 0,
       touchEvent: {
         swipeStartPosition: null,
         swipeEndPosition: null,
@@ -279,22 +279,22 @@ export default {
         this.removeMouseDragListeners()
         this.removeIntersectionObserver()
         this.setUpConfig()
-        // Wait for setSlideCount in updated() hook.
+        // Wait for updated() to set slideCount.
         await this.$nextTick()
         this.prepareCarousel()
-        this.skipToSlide(this.startingSlide)
+        this.skipToSlide(this.calculatedStartingSlide)
       },
       deep: true
     }
   },
   created() {
-    this.setUpConfig()
     this.setSlideCount()
+    this.setUpConfig()
   },
   mounted() {
     this.recordCurrentWindowWidth()
     this.prepareCarousel()
-    this.setCurrentSlide(this.startingSlide)
+    this.setCurrentSlide(this.calculatedStartingSlide)
     this.addResizeListener()
   },
   updated() {
@@ -694,10 +694,10 @@ export default {
      * The order of calling bundled methods is important!
      */
     prepareCarousel() {
-      this.setCurrentBreakpoint()
       this.setSlideCount()
-      this.setIsStatic()
       this.setCarouselWidth()
+      this.setCurrentBreakpoint()
+      this.setIsStatic()
       this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
       this.setStartingSlide()
 
@@ -952,15 +952,15 @@ export default {
      * ensure slide count is correct.
      */
     setSlideCount() {
-      this.slideCount = Object.keys(this.$slots).filter(
-        key => key !== 'previous' && key !== 'next'
-      ).length
+      this.slideCount = Object.keys(this.$slots).filter(key => {
+        return key !== 'previous' && key !== 'next'
+      }).length
     },
     /**
      * Set starting slide index for when carousel renders.
      */
     setStartingSlide() {
-      this.startingSlide = this.validateStartingSlide(
+      this.calculatedStartingSlide = this.validateStartingSlide(
         this.sliderConfig.startingSlide
       )
     },
@@ -1174,18 +1174,22 @@ export default {
      * true, the starting slide (index) will be translated using visibleSlideCount
      * because the indeces will not match due to cloning slides to give an
      * infinite-loop effect.
+     * @param {number|string} startSlide Index of slide to set as first slide.
      */
     validateStartingSlide(startSlide) {
       // Handle NaN or out of range slide by returning fallback values.
       if (
+        this.slideCount === 0 ||
         (!Number(startSlide) && Number(startSlide) !== 0) ||
         Number(startSlide) < 0 ||
         Number(startSlide) >= this.slideCount
       ) {
-        this.debug(
-          `Invalid startingSlide value: ${startSlide}. \nconfig.startingSlide must be a number between 0 and ${this
-            .slideCount - 1}.`
-        )
+        if (this.slideCount !== 0) {
+          this.debug(
+            `Invalid startingSlide value: ${startSlide}. \nconfig.startingSlide must be a number between 0 and ${this
+              .slideCount - 1}.`
+          )
+        }
         if (isTrue(this.sliderConfig.loop)) {
           return Math.ceil(this.visibleSlideCount)
         } else {
