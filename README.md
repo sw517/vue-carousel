@@ -287,9 +287,27 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
       <td>Boolean</td>
       <td><pre><code class="language-javascript">true</code></pre></td>
       <td>
-        <p>Determines if the user can drag carousele slides with touch input such as on mobile and tablets or with touch screen monitors.
+        <p>Determines if the user can drag carousel slides with touch input such as on mobile and tablets or with touch screen monitors.
         </p>
         <p>This is set to true by default as touch drag is better UX on touch devices compared to button presses.</p>
+      </td>
+    </tr>
+    <!-- transitionDuration -->
+    <tr>
+      <td>transitionDuration</td>
+      <td>Number</td>
+      <td><pre><code class="language-javascript">500</code></pre></td>
+      <td>
+        The CSS transition-duration property that controls how long it takes to animate between slides.
+      </td>
+    </tr>
+    <!-- transitionTimingFunction -->
+    <tr>
+      <td>transitionTimingFunction</td>
+      <td>String</td>
+      <td><pre><code class="language-javascript">'ease'</code></pre></td>
+      <td>
+        The CSS transition-timing-function property that controls the animation timing function between slides.
       </td>
     </tr>
   </tbody>
