@@ -2,21 +2,21 @@
   <nav role="navigation" class="v-carousel-pagination">
     <component :is="listType" class="v-carousel-pagination__list">
       <li
-        v-for="(page, index) in Number($props.count)"
+        v-for="(n, index) in Number($props.count)"
         :key="index"
         class="v-carousel-pagination__li"
       >
         <button
-          @click="handlePaginationClick(index + 1)"
-          @keydown.space.prevent="handlePaginationClick(index + 1)"
-          @keydown.enter="handlePaginationClick(index + 1)"
+          @click="handlePaginationClick(index)"
+          @keydown.space.prevent="handlePaginationClick(index)"
+          @keydown.enter="handlePaginationClick(index)"
           :style="$props.buttonStyles"
-          :aria-label="`Goto Page ${index + 1}`"
-          :aria-current="Number($props.current) === index + 1"
-          :title="`Go to Page ${index + 1}`"
+          :aria-label="`Go to Page ${n}`"
+          :aria-current="Number($props.current) === index"
+          :title="`Go to Page ${index}`"
           :class="{
             'v-carousel-pagination__btn--active':
-              Number($props.current) === index + 1,
+              Number($props.current) === index,
             'v-carousel-pagination__btn--number': $props.numbered
           }"
           class="v-carousel-pagination__btn"
@@ -24,7 +24,7 @@
           <span
             v-if="$props.numbered"
             class="v-carousel-pagination__btn__text"
-            >{{ index + 1 }}</span
+            >{{ n }}</span
           >
         </button>
       </li>
@@ -61,8 +61,8 @@ export default {
     }
   },
   methods: {
-    handlePaginationClick(page) {
-      this.$emit('pagination-click', page)
+    handlePaginationClick(index) {
+      this.$emit('pagination-click', index)
     }
   }
 }

@@ -1,3 +1,9 @@
+/**
+ * Function to allow values normally seen as truthy to be
+ * returned as false. E.g string "false" will be returned as false
+ * instead of native truthy value.
+ * @param {*} val Value to test as truthy
+ */
 export default function isTrue(val = null) {
   switch (typeof val) {
     case 'string':

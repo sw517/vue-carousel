@@ -171,22 +171,26 @@ export default {
       )
     },
     cPaginationCount() {
-      return this.cCanIncrementToLast ||
+      // if (isTrue(this.sliderConfig.group)) {
+      //   return Math.ceil(this.slideCount / this.visibleSlideCount)
+      if (
+        this.cCanIncrementToLast ||
         isTrue(this.sliderConfig.loop) ||
         isTrue(this.sliderConfig.center)
-        ? this.slideCount
-        : this.slideCount - Math.floor(this.visibleSlideCount) + 1
+      ) {
+        return this.slideCount
+      } else {
+        return this.slideCount - Math.floor(this.visibleSlideCount) + 1
+      }
     },
     /**
-     * Returns current slide for pagination component.
-     * Converts currentSlide (base-zero) into base-one for the
-     * pagination so starting page is 1.
+     * Returns current index for pagination component.
      */
     cPaginationCurrent() {
       if (isTrue(this.sliderConfig.loop)) {
-        return this.currentSlide - Math.ceil(this.visibleSlideCount) + 1
+        return this.currentSlide - Math.ceil(this.visibleSlideCount)
       } else {
-        return this.currentSlide + 1
+        return this.currentSlide
       }
     },
     cPlayAriaLabel() {
@@ -214,7 +218,9 @@ export default {
     },
     cShowPagination() {
       return (
-        this.slideCount > 0 && isTrue(this.sliderConfig.controls.showPagination)
+        this.slideCount > 0 &&
+        isTrue(this.sliderConfig.controls.showPagination) &&
+        this.visibleSlideCount < this.slideCount
       )
     },
     cShowPlayButton() {
@@ -681,16 +687,10 @@ export default {
     },
     /**
      * On pagination button click, set the current slide.
-     * The page value is decremented to make it base-0 as the
-     * pagination is base-1 but the carousel is base-0.
-     * @param {number} page The page number in base-1.
+     * @param {number} index The pagination index, base-0.
      */
-    onPaginationButtonClick(page) {
-      if (isTrue(this.sliderConfig.loop)) {
-        this.setCurrentSlide(page - 1 + Math.ceil(this.visibleSlideCount))
-      } else {
-        this.setCurrentSlide(page - 1)
-      }
+    onPaginationButtonClick(index) {
+      this.setCurrentSlide(this.paginationIndexToSlideIndex(index))
     },
     /**
      * Bundles methods for initialising carousel properties.
@@ -1003,6 +1003,7 @@ export default {
           showPlay: false
         },
         debug: false,
+        group: false,
         loop: false,
         mouseDrag: false,
         showEmptySpace: false,
@@ -1112,8 +1113,23 @@ export default {
           this.visibleSlideCount = sm || xs
           break
         default:
-          this.visibleSlideCount = xs // Set to 1 by default in props
+          this.visibleSlideCount = xs // Fallback value set to 1
           break
+      }
+    },
+    /**
+     * Transform the pagination index to the actual carousel slide index.
+     * @param {number} index The pagination index, base 0.
+     */
+    paginationIndexToSlideIndex(index) {
+      const { loop } = this.sliderConfig
+
+      // if (isTrue(group)) {
+      //   return Math.floor(this.slideCount / this.visibleSlideCount) * index
+      if (isTrue(loop)) {
+        return index + this.visibleSlideCount
+      } else {
+        return index
       }
     },
     /**

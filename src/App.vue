@@ -4,7 +4,10 @@
       :config="{
         debug: true,
         mouseDrag: true,
-        center: false,
+        group: true,
+        controls: {
+          showPagination: true
+        },
         startingSlide,
         slidesVisible: {
           xs: 2,
