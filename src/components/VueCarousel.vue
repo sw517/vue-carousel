@@ -115,7 +115,7 @@ export default {
       currentBreakpoint: 'xs',
       currentSlide: 0,
       currentWindowWidth: 0,
-      disableTransition: false,
+      disableTransition: true,
       dragPosition: null,
       isSkippingSlides: false,
       isStatic: false,
@@ -291,11 +291,15 @@ export default {
     this.setSlideCount()
     this.setUpConfig()
   },
-  mounted() {
+  async mounted() {
     this.recordCurrentWindowWidth()
     this.prepareCarousel()
     this.setCurrentSlide(this.calculatedStartingSlide)
     this.addResizeListener()
+
+    // Animation disabled on mounted to prevent sliding to first slide.
+    await this.$nextTick()
+    this.enableAnimation()
   },
   updated() {
     this.setSlideCount()
