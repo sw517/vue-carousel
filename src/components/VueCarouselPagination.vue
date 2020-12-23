@@ -13,7 +13,7 @@
           :style="$props.buttonStyles"
           :aria-label="`Go to Page ${n}`"
           :aria-current="Number($props.current) === index"
-          :title="`Go to Page ${index}`"
+          :title="`Go to Page ${n}`"
           :class="{
             'v-carousel-pagination__btn--active':
               Number($props.current) === index,

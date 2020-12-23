@@ -117,6 +117,7 @@ export default {
       currentWindowWidth: 0,
       disableTransition: true,
       dragPosition: null,
+      isLooped: false,
       isSkippingSlides: false,
       isStatic: false,
       manuallyPaused: false,
@@ -137,14 +138,20 @@ export default {
   computed: {
     /**
      * Returns the CSS Styles for the carousel cycle.
-     * Only styles if not static.
+     * Removes transition animation when skipping slides,
+     * dragging the carousel or if static.
      */
     cCycleStyles() {
       if (this.isStatic) return null
 
       let transform, transition
       let slideWidth = this.carouselWidth / this.visibleSlideCount
-      const { transitionDuration, transitionTimingFunction } = this.sliderConfig
+      const {
+        center,
+        group,
+        transitionDuration,
+        transitionTimingFunction
+      } = this.sliderConfig
 
       if (this.dragPosition) {
         transform = -(this.currentSlide * slideWidth - this.dragPosition)
@@ -153,7 +160,7 @@ export default {
         transition = `transform ${transitionDuration}ms ${transitionTimingFunction}`
       }
 
-      if (isTrue(this.sliderConfig.center)) {
+      if (!isTrue(group) && isTrue(center)) {
         const offset = this.carouselWidth / 2 - slideWidth / 2
         transform = transform + offset
       }
@@ -164,18 +171,25 @@ export default {
           this.disableTransition || this.dragPosition ? 'none' : transition
       }
     },
+    /**
+     * If true, will allow the currentSlide index to be set with a value
+     * up to (slideCount - 1).
+     * This property is used to prevent the currentSlide being set too high
+     * causing the carousel to show empty space if showEmptySpace is false.
+     */
     cCanIncrementToLast() {
       return (
-        isTrue(this.sliderConfig.center) ||
-        isTrue(this.sliderConfig.showEmptySpace)
+        !isTrue(this.sliderConfig.group) &&
+        (isTrue(this.sliderConfig.center) ||
+          isTrue(this.sliderConfig.showEmptySpace))
       )
     },
     cPaginationCount() {
-      // if (isTrue(this.sliderConfig.group)) {
-      //   return Math.ceil(this.slideCount / this.visibleSlideCount)
-      if (
+      if (isTrue(this.sliderConfig.group)) {
+        return Math.ceil(this.slideCount / this.visibleSlideCount)
+      } else if (
         this.cCanIncrementToLast ||
-        isTrue(this.sliderConfig.loop) ||
+        this.isLooped ||
         isTrue(this.sliderConfig.center)
       ) {
         return this.slideCount
@@ -187,11 +201,7 @@ export default {
      * Returns current index for pagination component.
      */
     cPaginationCurrent() {
-      if (isTrue(this.sliderConfig.loop)) {
-        return this.currentSlide - Math.ceil(this.visibleSlideCount)
-      } else {
-        return this.currentSlide
-      }
+      return this.slideIndexToPaginationIndex(this.currentSlide)
     },
     cPlayAriaLabel() {
       if (this.autoplayIntervalId) {
@@ -238,7 +248,7 @@ export default {
     cSlideIndexArray() {
       const slides = []
       for (let i = 0; i < this.slideCount; i += 1) slides.push(i)
-      if (!this.sliderConfig.loop || this.isStatic) return slides
+      if (!this.isLooped || this.isStatic) return slides
 
       const prefixSlides = []
       const suffixSlides = []
@@ -277,6 +287,7 @@ export default {
     currentBreakpoint() {
       this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
       this.setIsStatic()
+      this.setIsLooped()
     },
     config: {
       async handler() {
@@ -359,7 +370,7 @@ export default {
      * the last slide.
      */
     autoIncrement() {
-      if (this.sliderConfig.loop) {
+      if (this.isLooped) {
         this.handleIncrementWithLoop(1)
       } else {
         if (
@@ -376,6 +387,7 @@ export default {
      * Calculate how many slides to increment the carousel by. Slide
      * will not increment if user drags by only half a slide and takes
      * longer than the allowed amount of time to do so.
+     * Todo: Update for new group logic
      * @param {number} arg.swipeStartPosition X-Position of touch start.
      * @param {number} arg.swipeEndPosition X-Position of touch end.
      * @return {number} Number of slides to increment carousel.
@@ -384,7 +396,13 @@ export default {
       const swipeDiff = swipeEndPosition - swipeStartPosition
       const itemWidth = this.carouselWidth / this.visibleSlideCount
       let increment = 0
-      if (swipeDiff / itemWidth < 0.5 && swipeDiff / itemWidth > -0.5) {
+      if (isTrue(this.sliderConfig.group)) {
+        if (swipeDiff < 0) {
+          increment = this.visibleSlideCount
+        } else {
+          increment = -this.visibleSlideCount
+        }
+      } else if (swipeDiff / itemWidth < 0.5 && swipeDiff / itemWidth > -0.5) {
         const quickSwipeTime =
           this.touchEvent.endTimeStamp - this.touchEvent.startTimeStamp
         if (quickSwipeTime < 700) {
@@ -418,7 +436,7 @@ export default {
      * @property {number} slide The new slide index.
      */
     emitSlideChange(slide) {
-      if (isTrue(this.sliderConfig.loop)) {
+      if (this.isLooped) {
         this.$emit('slide-change', slide - Math.ceil(this.visibleSlideCount))
       } else {
         this.$emit('slide-change', slide)
@@ -436,7 +454,7 @@ export default {
      * to prevent the slides flickering when re-rendering.
      */
     getSlideKey(index) {
-      if (isTrue(this.sliderConfig.loop)) {
+      if (this.isLooped) {
         return index - Math.ceil(this.visibleSlideCount)
       } else {
         return index
@@ -484,8 +502,14 @@ export default {
 
       return padding
     },
-    handleIncrementButtonClick(increment) {
-      if (isTrue(this.sliderConfig.loop)) {
+    /**
+     * Called on clicking 'Next' or 'Prev' button controls.
+     * @param {number} i The number to increment the carousel by.
+     */
+    handleIncrementButtonClick(i) {
+      // If config.group is true, increment by entire group. Use arg 'i' to get direction.
+      const increment = this.sliderConfig.group ? this.visibleSlideCount * i : i
+      if (this.isLooped) {
         this.handleIncrementWithLoop(increment)
       } else {
         this.handleIncrement(increment)
@@ -514,7 +538,11 @@ export default {
         }
       } else {
         // Handle move to next slide.
-        if (
+        if (isTrue(this.sliderConfig.group)) {
+          if (this.currentSlide + increment < this.slideCount) {
+            this.setCurrentSlide(this.currentSlide + increment)
+          }
+        } else if (
           (this.cCanIncrementToLast &&
             this.currentSlide + increment < this.slideCount) ||
           this.currentSlide + increment <
@@ -641,7 +669,7 @@ export default {
       if (swipeTime < allowedTime) {
         const increment = this.calculateTouchSlideIncrement(this.touchEvent)
 
-        if (isTrue(this.sliderConfig.loop)) {
+        if (this.isLooped) {
           this.handleIncrementWithLoop(increment)
         } else {
           this.handleIncrement(increment)
@@ -653,12 +681,12 @@ export default {
      * @param {string} button 'prev' or 'next'
      */
     isButtonDisabled(button) {
-      if (isTrue(this.sliderConfig.loop)) return false
+      if (this.isLooped) return false
 
       if (this.currentSlide === 0 && button === 'prev') return true
       if (
         (!this.cCanIncrementToLast &&
-          this.currentSlide === this.slideCount - this.visibleSlideCount &&
+          this.currentSlide >= this.slideCount - this.visibleSlideCount &&
           button === 'next') ||
         (this.cCanIncrementToLast &&
           this.currentSlide === this.slideCount - 1 &&
@@ -693,6 +721,27 @@ export default {
       this.setCurrentSlide(this.paginationIndexToSlideIndex(index))
     },
     /**
+     * Transform the pagination index to the actual carousel slide index.
+     * @param {number} index The pagination index, base 0.
+     */
+    paginationIndexToSlideIndex(index) {
+      const { group } = this.sliderConfig
+
+      if (isTrue(group)) {
+        if (this.isLooped) {
+          return (
+            Math.floor(this.visibleSlideCount) * index + this.visibleSlideCount
+          )
+        } else {
+          return Math.floor(this.visibleSlideCount) * index
+        }
+      } else if (this.isLooped) {
+        return index + this.visibleSlideCount
+      } else {
+        return index
+      }
+    },
+    /**
      * Bundles methods for initialising carousel properties.
      * Method can be called when props are updated.
      * The order of calling bundled methods is important!
@@ -701,8 +750,9 @@ export default {
       this.setSlideCount()
       this.setCarouselWidth()
       this.setCurrentBreakpoint()
-      this.setIsStatic()
       this.setVisibleSlideCount(this.sliderConfig.slidesVisible)
+      this.setIsStatic()
+      this.setIsLooped()
       this.setStartingSlide()
 
       if (isTrue(this.sliderConfig.touchDrag)) {
@@ -915,6 +965,26 @@ export default {
       this.observer.observe(this.$el)
     },
     /**
+     * Set the 'isLooped' property true if set in config prop.
+     * Property will be set to false if config.group is true AND
+     * there is a remainder of slides when you divide the total
+     * slide count by the number of visible slides.
+     */
+    setIsLooped() {
+      let isLooped = false
+
+      if (isTrue(this.sliderConfig.loop)) {
+        if (
+          !isTrue(this.sliderConfig.group) ||
+          (isTrue(this.sliderConfig.group) &&
+            this.slideCount % this.visibleSlideCount === 0)
+        ) {
+          isLooped = true
+        }
+      }
+      this.isLooped = isLooped
+    },
+    /**
      * Gets the current breakpoint and slider config to
      * detirmine whether the slider should be static or able to slide.
      * This component is built mobile first so if only mobile
@@ -1118,16 +1188,25 @@ export default {
       }
     },
     /**
-     * Transform the pagination index to the actual carousel slide index.
-     * @param {number} index The pagination index, base 0.
+     * Transform the carousel slide index to the pagination index.
+     * @param {number} index The carousel slide index, base 0.
      */
-    paginationIndexToSlideIndex(index) {
-      const { loop } = this.sliderConfig
+    slideIndexToPaginationIndex(index) {
+      const { group } = this.sliderConfig
 
-      // if (isTrue(group)) {
-      //   return Math.floor(this.slideCount / this.visibleSlideCount) * index
-      if (isTrue(loop)) {
-        return index + this.visibleSlideCount
+      if (isTrue(group)) {
+        // Dividing by 0 returns Infinity in JS.
+        if (this.isLooped) {
+          const i = Math.floor(
+            (index - this.visibleSlideCount) / this.visibleSlideCount
+          )
+          return i === Infinity ? 0 : i
+        } else {
+          const i = Math.floor(index / this.visibleSlideCount)
+          return i === Infinity ? 0 : i
+        }
+      } else if (this.isLooped) {
+        return index - this.visibleSlideCount
       } else {
         return index
       }
@@ -1197,6 +1276,8 @@ export default {
      * @param {number|string} startSlide Index of slide to set as first slide.
      */
     validateStartingSlide(startSlide) {
+      const { group } = this.sliderConfig
+
       // Handle NaN or out of range slide by returning fallback values.
       if (
         this.slideCount === 0 ||
@@ -1210,7 +1291,12 @@ export default {
               .slideCount - 1}.`
           )
         }
-        if (isTrue(this.sliderConfig.loop)) {
+        if (isTrue(group)) {
+          const validatedStartSlide = Math.floor(
+            startSlide / this.visibleSlideCount
+          )
+          return validatedStartSlide === Infinity ? 0 : validatedStartSlide
+        } else if (this.isLooped) {
           return Math.ceil(this.visibleSlideCount)
         } else {
           return 0
@@ -1219,7 +1305,19 @@ export default {
 
       // Translate index if carousel is looped or lower index to keep in range if
       // showEmptySpace and center are both false.
-      if (isTrue(this.sliderConfig.loop)) {
+      if (isTrue(group)) {
+        if (this.isLooped) {
+          const validatedStartSlide = Math.floor(
+            startSlide / this.visibleSlideCount + this.visibleSlideCount
+          )
+          return validatedStartSlide === Infinity ? 0 : validatedStartSlide
+        } else {
+          const validatedStartSlide = Math.floor(
+            startSlide / this.visibleSlideCount
+          )
+          return validatedStartSlide === Infinity ? 0 : validatedStartSlide
+        }
+      } else if (this.isLooped) {
         return Number(startSlide) + Math.ceil(this.visibleSlideCount)
       } else if (
         !this.cCanIncrementToLast &&

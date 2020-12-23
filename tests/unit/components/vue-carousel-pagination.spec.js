@@ -39,6 +39,6 @@ describe('Vue Carousel Pagination', () => {
     const buttons = wrapper.findAll('button')
     const buttonIndex = 3
     await buttons.at(buttonIndex).trigger('click')
-    expect(wrapper.emitted()['pagination-click'][0][0]).toBe(buttonIndex + 1)
+    expect(wrapper.emitted()['pagination-click'][0][0]).toBe(buttonIndex)
   })
 })

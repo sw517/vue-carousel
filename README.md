@@ -1,6 +1,6 @@
 # vue-carousel
 
-### Installation
+## Installation
 
 1. Install the npm package
     ```bash
@@ -76,6 +76,7 @@
 ### Config
 
 #### Example
+
 Vue carousel takes a `config` prop - an object contain various keys to change the functionality and appearance of the component.
 
 ```vue
@@ -90,7 +91,8 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
 </vue-carousel>
 ```
 
-#### Parameters
+## Parameters
+
 <table>
   <thead>
     <th>Key</th>
@@ -146,7 +148,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
       <td>center</td>
       <td>Boolean</td>
       <td><pre><code class="language-javascript">false</code></pre></td>
-      <td>Aligns the current slide in the center of the carousel instead of to the left-side.</td>
+      <td>Aligns the current slide in the center of the carousel instead of to the left-side. Caveat - `center` will be disabled if `group` is `true`.</td>
     </tr>
     <!-- controls -->
     <tr>
@@ -191,12 +193,19 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
       <td><pre><code class="language-javascript">false</code></pre></td>
       <td>Allows warnings and caught-errors in console if enabled.</td>
     </tr>
+    <!-- group -->
+    <tr>
+      <td>group</td>
+      <td>Boolean</td>
+      <td><pre><code class="language-javascript">false</code></pre></td>
+      <td>Group all items in current view to move all outside of view and show all new items when the carousel is dragged or the pagination or control buttons are clicked. By default, items are treated individually and will move one at a time. Caveat - if both `group` and `loop` are set to true, ensure there is no remainder of slides when dividing total slide-count by the value of `slidesVisible` at the current breakpoint.</td>
+    </tr>
     <!-- loop -->
     <tr>
       <td>loop</td>
       <td>Boolean</td>
       <td><pre><code class="language-javascript">false</code></pre></td>
-      <td>Determines if the carousel should loop infintely. If false, carousel will only animate between first and last slide.</td>
+      <td>Determines if the carousel should loop infintely. If false, carousel will only animate between first and last slide. Caveat - loop will be disabled if `group` is `true` but slide-count divided by the `slideVisible` value at the current breakpoint leaves a remainder.</td>
     </tr>
     <!-- mouseDrag -->
     <tr>
@@ -313,7 +322,7 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   </tbody>
 </table>
 
-### Event API
+## Event API
 <table>
   <thead>
     <th>Event</th>
@@ -329,11 +338,11 @@ Vue carousel takes a `config` prop - an object contain various keys to change th
   </tbody>
 </table>
 
-### Styling
+## Styling
 
 Although the controls have options to pass styling through a JS object, this isn't always ideal, especially when you want to use your own CSS variables and mixins. You will find below a list of CSS classes that you can target to override existing styles.
 
-#### Carousel classes
+### Carousel classes
 
 ```
 .v-carousel
@@ -346,7 +355,7 @@ If you set a breakpoint to become static, you may want to change the layout of t
 ```
 
 
-#### Controls classes
+### Controls classes
 
 ```
 .v-carousel__controls__btn
@@ -364,7 +373,7 @@ If you set a breakpoint to become static, you may want to change the layout of t
 ```
 
 
-#### Slides
+### Slides
 
 ```
 .v-carousel__slide
@@ -372,16 +381,16 @@ If you set a breakpoint to become static, you may want to change the layout of t
 
 ---
 
-### Troubleshooting
+## Troubleshooting
 
 Note: Ensure that you do not apply any attributes to slide slots within the carousel that should not be duplicated such as `id` as if you set `loop` to `true`, the content in these slides will be duplicated and will cause issues.
 
-#### The first slide is missing content
+### The first slide is missing content
 The carousel uses base-0 incrementing numbers for slot names.
 
 `v-for="n in 10"` will produce numbers 1-10 for `n`. You will need to use `v-slot:[n-1]` to include the first slides content.
 
-#### My styling isn't being applied to the carousel elements
+### My styling isn't being applied to the carousel elements
 If you are using scoped styles, ensure that you are using `::v-deep` before targetting the carousel class.
 
 Example
@@ -395,10 +404,20 @@ Example
 </style>
 ```
 
-#### The carousel won't autoplay when off-screen
+### The carousel won't autoplay when off-screen
 
 The carousel uses an [Intersection Observer](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) to remove the autoplay-interval when the carousel is not visible on screen.
 
 This has been done to improve efficiency of the browser so that the carousel is not carrying out performance-expensive animations that may interfer with the user's experience.
 
 Autoplay will be enabled again when the carousel is visible again.
+
+### The carousel is not looping when `loop` is `true`
+
+If `config.group` is set to `true`, ensure that the total slide-count can be divided by your `config.slidesVisible` value at the current breakpoint without remainder. e.g
+
+`slide-count (10) % config.slidesVisible.xs (2) = 0` ✅
+
+`slide-count (10) % config.slidesVisible.sm (3) = 1` ❌
+
+If there is a remainder, `loop` will be disabled because there will not be enough items to fill out the last group of slides.
