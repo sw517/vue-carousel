@@ -4,8 +4,9 @@
       :config="{
         debug: true,
         mouseDrag: true,
-        loop: false,
+        loop: true,
         group: true,
+        autoplay: true,
         controls: {
           showPagination: true
         },

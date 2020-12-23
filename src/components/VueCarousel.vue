@@ -370,11 +370,21 @@ export default {
      * the last slide.
      */
     autoIncrement() {
+      const increment = isTrue(this.sliderConfig.group)
+        ? this.visibleSlideCount
+        : 1
+
       if (this.isLooped) {
-        this.handleIncrementWithLoop(1)
+        this.handleIncrementWithLoop(increment)
       } else {
-        if (
-          this.currentSlide + 1 <=
+        if (isTrue(this.sliderConfig.group)) {
+          if (this.currentSlide + increment < this.slideCount) {
+            this.handleIncrement(increment)
+          } else {
+            this.setCurrentSlide(0)
+          }
+        } else if (
+          this.currentSlide + increment <=
           this.slideCount - Math.floor(this.visibleSlideCount)
         ) {
           this.handleIncrement(1)
