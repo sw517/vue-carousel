@@ -7,6 +7,7 @@
         class="v-carousel-pagination__li"
       >
         <button
+          type="button"
           @click="handlePaginationClick(index)"
           @keydown.space.prevent="handlePaginationClick(index)"
           @keydown.enter="handlePaginationClick(index)"
