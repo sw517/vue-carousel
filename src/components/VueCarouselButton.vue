@@ -1,5 +1,5 @@
 <template>
-  <button class="v-carousel-btn">
+  <button type="button" class="v-carousel-btn">
     <slot>
       <div v-html="$props.content" />
     </slot>
